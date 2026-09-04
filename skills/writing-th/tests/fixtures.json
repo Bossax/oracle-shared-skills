@@ -1,0 +1,138 @@
+{
+  "_note": "Regression cases for lint_thai_writing.py. Every entry marked `defect` is one of the failures verified by running the pre-2026-08-25 linter. `expect` is the required exit status: pass = exit 0, fail = exit 1.",
+  "cases": [
+    {
+      "name": "wiki-link path containing DCCE",
+      "expect": "pass",
+      "defect": "false positive: DCCE matched inside a file path",
+      "text": "เอกสารอ้างอิงหลักของโครงการ\n\n[[ψ/incubate/DCCE/CRDB/inbox_source/CRDB-TOR|ขอบเขตงาน]]\n"
+    },
+    {
+      "name": "DCCE standing alone in prose",
+      "expect": "fail",
+      "text": "DCCE จัดทำรายงานฉบับนี้เพื่อเสนอต่อคณะกรรมการ\n"
+    },
+    {
+      "name": "inline code containing a banned English term",
+      "expect": "pass",
+      "defect": "false positive: banned term matched inside code",
+      "text": "ระบบกำหนดค่าผ่านพารามิเตอร์ `workflow_id` ที่ระบุไว้ในเอกสาร\n"
+    },
+    {
+      "name": "banned English term in prose",
+      "expect": "fail",
+      "text": "ทีมงานออกแบบ workflow สำหรับการนำเข้าข้อมูล\n"
+    },
+    {
+      "name": "parenthetical: two Title-Case words",
+      "expect": "fail",
+      "text": "การประเมินความพร้อมของข้อมูล (Data Availability) เป็นขั้นตอนแรก\n"
+    },
+    {
+      "name": "parenthetical: mixed case, was missed",
+      "expect": "fail",
+      "defect": "missed by the old regex, named as banned in the pack",
+      "text": "ความครบถ้วนเชิงเวลา (Temporal completeness) ยังไม่ได้รับการตรวจสอบ\n"
+    },
+    {
+      "name": "parenthetical: three words, was missed",
+      "expect": "fail",
+      "defect": "missed by the old regex, named as banned in the pack",
+      "text": "ขั้นตอนถัดไปคือการทดสอบขอบเขต (Bounded Application Test) กับหน่วยงานนำร่อง\n"
+    },
+    {
+      "name": "parenthetical: single word, was missed",
+      "expect": "fail",
+      "defect": "missed by the old regex",
+      "text": "โครงสร้างการกำกับดูแล (Governance) ต้องระบุผู้รับผิดชอบ\n"
+    },
+    {
+      "name": "parenthetical: official acronym is allowed",
+      "expect": "pass",
+      "text": "ชุดข้อมูลอ้างอิงตามมาตรฐาน (MVD) ที่กรมฯ ประกาศใช้\n"
+    },
+    {
+      "name": "parenthetical: schema name is allowed",
+      "expect": "pass",
+      "text": "ตารางหลักของระบบคือ (DISASTER_EVENT) ซึ่งบันทึกเหตุการณ์รายครั้ง\n"
+    },
+    {
+      "name": "contrast scaffolding within one clause",
+      "expect": "fail",
+      "text": "ระบบนี้ไม่ได้เป็นเพียงเครื่องมือ แต่เป็นกลไกเชิงสถาบัน\n"
+    },
+    {
+      "name": "unrelated ไม่ได้ and แต่ far apart",
+      "expect": "pass",
+      "defect": "false positive: old rule matched across an entire paragraph",
+      "text": "กรมฯ ไม่ได้จัดทำรายงานฉบับนี้ในปีงบประมาณ 2565 การดำเนินงานจริงเริ่มขึ้นในปีถัดมาหลังจากได้รับการจัดสรรงบประมาณเพิ่มเติมจากสำนักงบประมาณ แต่ยังคงครอบคลุมเพียงพื้นที่นำร่องเท่านั้น\n"
+    },
+    {
+      "name": "ปิด as a general completion verb",
+      "expect": "fail",
+      "defect": "dead rule 34: prose description compiled as a character class",
+      "text": "ทีมงานปิดผังเว็บไซต์เรียบร้อยแล้วในเดือนที่ผ่านมา\n"
+    },
+    {
+      "name": "quoted English strategy codename",
+      "expect": "fail",
+      "defect": "dead rule 31: parentheses compiled as a capture group",
+      "text": "แนวทางนี้เรียกว่า \"Blueprint-as-a-Shield\" ซึ่งใช้ในการวางกรอบการทำงาน\n"
+    },
+    {
+      "name": "abstract positional noun จุดยืน",
+      "expect": "fail",
+      "defect": "dead rule 29: required both terms adjacent with a slash",
+      "text": "เอกสารฉบับนี้ระบุจุดยืนของหน่วยงานต่อการเปิดเผยข้อมูล\n"
+    },
+    {
+      "name": "connective filler นอกจากนี้ (folded from TOR5.5)",
+      "expect": "fail",
+      "defect": "dormant in an unenforced pack since 2026-06-25",
+      "text": "นอกจากนี้ หน่วยงานยังต้องจัดทำรายงานประจำปีเสนอต่อคณะกรรมการ\n"
+    },
+    {
+      "name": "transliteration เอฟเฟกต์ (folded from TOR5.5)",
+      "expect": "fail",
+      "defect": "dormant in an unenforced pack since 2026-06-25",
+      "text": "การเปลี่ยนแปลงดังกล่าวสร้างเอฟเฟกต์ต่อภาคการเกษตรอย่างชัดเจน\n"
+    },
+    {
+      "name": "pseudo-passive without a named actor",
+      "expect": "fail",
+      "text": "รายงานฉบับนี้ถูกจัดทำขึ้นเพื่อเสนอต่อคณะกรรมการระดับชาติ\n"
+    },
+    {
+      "name": "hyperbole ไร้รอยต่อ",
+      "expect": "fail",
+      "text": "ระบบเชื่อมโยงข้อมูลระหว่างหน่วยงานได้อย่างไร้รอยต่อ\n"
+    },
+    {
+      "name": "clean institutional prose",
+      "expect": "pass",
+      "text": "กรมฯ จัดทำบัญชีรายการชุดข้อมูลพื้นฐาน เพื่อให้หน่วยงานที่เกี่ยวข้องใช้อ้างอิงร่วมกัน โดยกำหนดผู้รับผิดชอบรายชุดข้อมูลไว้อย่างชัดเจน\n"
+    },
+    {
+      "name": "internal slide locator from exec-summary failure",
+      "expect": "fail",
+      "text": "สไลด์ที่ 13 ระบุว่าผู้ใช้ยังค้นหาข้อมูลที่ต้องการไม่พบ\n"
+    },
+    {
+      "name": "bare NCAIF from cross-section regression",
+      "expect": "fail",
+      "text": "คณะที่ปรึกษาจัดทำ NCAIF เพื่อใช้เป็นกรอบการพัฒนาระบบข้อมูล\n"
+    },
+    {
+      "name": "diagram rendered as inline arrow chain",
+      "expect": "pass",
+      "expect_review": "[ARTIFACT]",
+      "text": "กระบวนการประกอบด้วย การรวบรวมหลักฐาน → การสังเคราะห์ → การยกร่าง → การรับฟังความเห็น\n"
+    },
+    {
+      "name": "report roadmap meta-commentary",
+      "expect": "pass",
+      "expect_review": "[META]",
+      "text": "ส่วนที่เหลือของรายงานฉบับนี้จัดเรียงเนื้อหาตามหัวข้อที่กำหนดไว้\n"
+    }
+  ]
+}
