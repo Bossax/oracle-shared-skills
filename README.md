@@ -2,7 +2,16 @@
 
 Single, version-controlled source of truth for writing skills shared across Oracle
 persona projects (`Susu_Ocean`, `Arun_Creagy`, and future ones). Currently holds
-`style-capture` and `writing-th`.
+`style-capture`, `writing-th`, and `shared-skill-release` (the release tooling for
+this repo itself).
+
+## Releasing a change
+
+Made and validated an improvement to a skill while working in a consuming project?
+Use the `shared-skill-release` skill (`skills/shared-skill-release/SKILL.md`) rather
+than doing the git steps by hand — it walks the switch-off-detached-HEAD step, tags
+and pushes, and propagates the bump to every project listed in `consumers.json`,
+flagging the two things junctions don't cover (subagent defs, hooks) along the way.
 
 ## Why this exists
 
