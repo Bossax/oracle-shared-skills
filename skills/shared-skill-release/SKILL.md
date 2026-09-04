@@ -112,8 +112,10 @@ powershell -File <project>\.oracle-shared-skills\skills\shared-skill-release\scr
 ```
 
 This walks `consumers.json`, and for every project other than the one just released
-from: fetches the tag, checks it out in that project's submodule, and commits the
-pointer bump in that project.
+from: fetches the tag, checks it out in that project's submodule, commits the
+pointer bump in that project, and always re-runs `sync-skills.ps1` (`.agents\skills`
+is a copy, not a junction — see README — so it needs an explicit refresh on every
+release regardless of what changed).
 
 ## Step 7 — Hooks need a human per project, always
 

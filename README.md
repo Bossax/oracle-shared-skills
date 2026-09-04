@@ -26,31 +26,31 @@ their content is authored. Consuming projects reference it, they don't fork it.
    git submodule add https://github.com/Bossax/oracle-shared-skills.git .oracle-shared-skills
    cd .oracle-shared-skills && git checkout <tag> && cd ..
    ```
-2. Create NTFS junctions (not copies, not symlinks) from the project's skill
-   folders into the submodule checkout:
+2. Create NTFS junctions (not copies, not symlinks) from `.claude\skills\<name>`
+   into the submodule checkout:
    ```
    New-Item -ItemType Junction -Path ".claude\skills\style-capture" -Target ".oracle-shared-skills\skills\style-capture"
    New-Item -ItemType Junction -Path ".claude\skills\writing-th"    -Target ".oracle-shared-skills\skills\writing-th"
-   New-Item -ItemType Junction -Path ".agents\skills\style-capture" -Target ".oracle-shared-skills\skills\style-capture"
-   New-Item -ItemType Junction -Path ".agents\skills\writing-th"    -Target ".oracle-shared-skills\skills\writing-th"
    ```
-   Junctions need no admin rights or Developer Mode (unlike symlinks), and they
-   resolve transparently for any AI agent that reads a skills folder — Claude Code,
-   Antigravity, Codex, etc.
-3. Run `scripts\sync-agents.ps1 -ProjectRoot <project root>` to copy the shared
+   Junctions need no admin rights or Developer Mode (unlike symlinks), and Claude
+   Code resolves them transparently.
+3. Populate `.agents\skills\<name>` as real copies (not junctions) via
+   `scripts\sync-skills.ps1 -ProjectRoot <project root>` — see "Why .agents\skills
+   is copied, not junctioned" below. Re-run after any change to a skill's content.
+4. Run `scripts\sync-agents.ps1 -ProjectRoot <project root>` to copy the shared
    subagent definitions into `.claude\agents\` (these are small individual files
    mixed into a directory that also holds project-specific agents, so they're
    copied, not junctioned — see "Why subagents are copied, not junctioned" below).
-4. Apply `skills\writing-th\setup\settings.local.hooks.json` to the project's
+5. Apply `skills\writing-th\setup\settings.local.hooks.json` to the project's
    `.claude\settings.local.json` (merge the `hooks` key in by hand, or run
    `skills\writing-th\setup\merge-hooks.ps1`). This wires the PreToolUse/PostToolUse
    gates that actually enforce `writing-th`'s draft-preconditions/lint rules.
-5. Set up the Python environment writing-th's scripts need:
+6. Set up the Python environment writing-th's scripts need:
    ```
    python -m venv .oracle-shared-skills\skills\writing-th\.venv
    .oracle-shared-skills\skills\writing-th\.venv\Scripts\python -m pip install -r .oracle-shared-skills\skills\writing-th\scripts\requirements.txt
    ```
-6. Verify: `python .oracle-shared-skills\skills\writing-th\tests\run_tests.py -v`
+7. Verify: `python .oracle-shared-skills\skills\writing-th\tests\run_tests.py -v`
 
 ## The path-depth invariant (important — don't restructure lightly)
 
@@ -75,6 +75,26 @@ zero script changes — the resolved physical path is still
 that computes `parents[3]` (currently: `post_draft_lint.py`, `run_tests.py`,
 `test_editorial_gate.py`; also `check_draft_preconditions.py` if it does the same
 — check before changing).
+
+## Why .agents\skills is copied, not junctioned
+
+Originally `.agents\skills\<name>` was also a junction, on the assumption that
+any agent reading a skills folder would resolve it the same way Claude Code
+does. Confirmed empirically it does not hold: with `.agents\skills\<name>`
+junctioned, **Codex** resolved the skills correctly, but **Antigravity** showed
+none of them — while every plain-directory skill in the same folder showed up
+fine for both. That isolates it to Antigravity's own skill scanner apparently
+skipping NTFS reparse points when walking the directory, even though its MCP
+server launcher (which only needs a resolved file path, no directory listing)
+has no such problem with junctions elsewhere.
+
+Since a real directory works for any scanner regardless of reparse-point
+handling, `.agents\skills\<name>` trades the junction's free-update property for
+actually working in every consumer agent. Run `scripts\sync-skills.ps1
+-ProjectRoot <project root>` after any change to a skill's content — this needs
+an explicit re-sync, the same category as the subagent `.md` files below.
+`.claude\skills\<name>` stays junctioned; only Claude Code reads that path, and
+junctions work fine there.
 
 ## Why subagents are copied, not junctioned
 
@@ -113,8 +133,11 @@ git checkout <new tag>
 cd ..
 git add .oracle-shared-skills
 git commit -m "bump oracle-shared-skills to <new tag>"
+scripts\sync-skills.ps1 -ProjectRoot <project root>   # always - refreshes .agents\skills copies
 scripts\sync-agents.ps1 -ProjectRoot <project root>   # only if agents/*.md changed
 ```
 
-Junctions never need to be recreated for an ordinary content change — only if
-this repo's internal folder layout changes (see the path-depth invariant above).
+`.claude\skills\<name>` junctions never need to be recreated for an ordinary
+content change — only if this repo's internal folder layout changes (see the
+path-depth invariant above). `.agents\skills\<name>` always needs the explicit
+`sync-skills.ps1` re-run, since it's a copy, not a junction.

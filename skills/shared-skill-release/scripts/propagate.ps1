@@ -50,6 +50,14 @@ foreach ($c in $consumers) {
     git commit -m "bump oracle-shared-skills to $Tag"
     Pop-Location
 
+    # .agents\skills copies always need refreshing - they're not junctions (see
+    # README "Why .agents\skills is copied, not junctioned"), so any skill
+    # content change requires this regardless of what else changed.
+    $skillsSyncScript = Join-Path $sub "scripts\sync-skills.ps1"
+    if (Test-Path $skillsSyncScript) {
+        powershell -File $skillsSyncScript -ProjectRoot $c.path
+    }
+
     if ($SyncAgents) {
         $syncScript = Join-Path $sub "scripts\sync-agents.ps1"
         if (Test-Path $syncScript) {
