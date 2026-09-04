@@ -55,7 +55,7 @@ local changes.
 Run:
 
 ```
-powershell -File skills\shared-skill-release\scripts\detect-drift.ps1 -ProjectRoot <project root>
+pwsh -File skills\shared-skill-release\scripts\detect-drift.ps1 -ProjectRoot <project root>
 ```
 
 This checks two categories that junctions do **not** cover:
@@ -94,7 +94,7 @@ why, in the style of the existing entries.
 ## Step 4 — Commit, tag, and push the shared repo
 
 ```
-powershell -File skills\shared-skill-release\scripts\release.ps1 -SharedRepoPath <project>\.oracle-shared-skills -Version vX.Y.Z -Message "<commit message>"
+pwsh -File skills\shared-skill-release\scripts\release.ps1 -SharedRepoPath <project>\.oracle-shared-skills -Version vX.Y.Z -Message "<commit message>"
 ```
 
 ## Step 5 — Record the source project's own submodule bump
@@ -108,7 +108,7 @@ git commit -m "bump oracle-shared-skills to vX.Y.Z"
 ## Step 6 — Propagate to every other consumer project
 
 ```
-powershell -File <project>\.oracle-shared-skills\skills\shared-skill-release\scripts\propagate.ps1 -Tag vX.Y.Z -ExcludeProjectPaths <project> -SyncAgents:<$true if Step 2 added/changed a subagent file, else $false>
+pwsh -File <project>\.oracle-shared-skills\skills\shared-skill-release\scripts\propagate.ps1 -Tag vX.Y.Z -ExcludeProjectPaths <project> -SyncAgents:<$true if Step 2 added/changed a subagent file, else $false>
 ```
 
 This walks `consumers.json`, and for every project other than the one just released
@@ -124,7 +124,7 @@ auto-applied to another project's `settings.local.json` — tell the user explic
 which other projects need it, and give them the exact command:
 
 ```
-powershell -File <that project>\.oracle-shared-skills\skills\writing-th\setup\merge-hooks.ps1 -SettingsPath <that project>\.claude\settings.local.json
+pwsh -File <that project>\.oracle-shared-skills\skills\writing-th\setup\merge-hooks.ps1 -SettingsPath <that project>\.claude\settings.local.json
 ```
 
 Remind them it backs up the existing file and only replaces the `hooks` key — they

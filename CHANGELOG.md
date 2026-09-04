@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.1 — 2026-09-05
+
+**Bug fix**: every `powershell -File ...` invocation documented in
+`shared-skill-release`'s SKILL.md, and the two internal script-to-script calls
+in `propagate.ps1`, now use `pwsh -File ...` instead. `powershell` resolves to
+legacy Windows PowerShell 5.1, which doesn't support `ConvertFrom-Json
+-AsHashtable` (used throughout this repo's JSON-merge logic) - it hard-fails
+loudly when actually needed. Also removed stray em-dash characters from 4
+`.ps1` files (`detect-drift.ps1`, `propagate.ps1`, `release.ps1`,
+`merge-hooks.ps1`) - legacy `powershell.exe` misreads non-ASCII bytes without
+an explicit encoding, corrupting string literals mid-parse. Found via
+`mcp-registry`'s sibling bug in the exact same pattern - fixed there too, in
+`~/.claude/skills/mcp-registry/SKILL.md`.
+
+No interface or behavior change - scripts always worked when invoked through a
+PowerShell 7 host (e.g. via the `&` call operator from another pwsh session);
+this only fixes the documented/scripted `powershell -File` invocation path.
+
 ## v1.2.0 — 2026-09-05
 
 **Architecture correction**: `.agents\skills\<name>` was a junction, same as

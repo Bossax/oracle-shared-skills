@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Commits, tags, and pushes a validated change in an oracle-shared-skills checkout.
-  Safe to call from a project's detached-HEAD submodule checkout — switches to main
+  Safe to call from a project's detached-HEAD submodule checkout - switches to main
   first if needed, bringing uncommitted changes along.
 
 .PARAMETER SharedRepoPath
@@ -27,10 +27,10 @@ Push-Location $SharedRepoPath
 try {
     $branch = git branch --show-current
     if ([string]::IsNullOrWhiteSpace($branch)) {
-        Write-Host "Detached HEAD detected — switching to main and bringing changes along..."
+        Write-Host "Detached HEAD detected - switching to main and bringing changes along..."
         git switch main
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "git switch main failed — resolve manually before releasing. Uncommitted changes were NOT touched."
+            Write-Error "git switch main failed - resolve manually before releasing. Uncommitted changes were NOT touched."
             return
         }
         git pull
@@ -42,7 +42,7 @@ try {
     git add -A
     git commit -m $Message
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Commit failed or nothing to commit — check status above."
+        Write-Error "Commit failed or nothing to commit - check status above."
         return
     }
 

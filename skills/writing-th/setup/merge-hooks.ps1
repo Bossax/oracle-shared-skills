@@ -5,10 +5,10 @@
 
 .DESCRIPTION
   Backs up settings.local.json before writing. Only replaces the top-level
-  "hooks" key with the one from settings.local.hooks.json — permissions,
+  "hooks" key with the one from settings.local.hooks.json - permissions,
   skillOverrides, enabledMcpjsonServers, etc. are left untouched. If the project
   already has its own "hooks" key (e.g. for a different tool matcher), review the
-  backup diff manually — this script overwrites "hooks" wholesale, it does not
+  backup diff manually - this script overwrites "hooks" wholesale, it does not
   attempt a deep merge of individual hook entries.
 
 .PARAMETER SettingsPath
@@ -29,7 +29,7 @@ if (Test-Path $SettingsPath) {
     Write-Host "Backed up existing settings to $backup"
     $existing = Get-Content $SettingsPath -Raw | ConvertFrom-Json -AsHashtable
 } else {
-    Write-Host "No existing settings.local.json at $SettingsPath — creating new."
+    Write-Host "No existing settings.local.json at $SettingsPath - creating new."
     $existing = @{}
 }
 
@@ -42,4 +42,4 @@ $dir = Split-Path $SettingsPath -Parent
 if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
 
 $existing | ConvertTo-Json -Depth 10 | Set-Content $SettingsPath
-Write-Host "Merged writing-th hooks into $SettingsPath — review the diff before trusting it."
+Write-Host "Merged writing-th hooks into $SettingsPath - review the diff before trusting it."

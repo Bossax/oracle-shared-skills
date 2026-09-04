@@ -2,17 +2,17 @@
 .SYNOPSIS
   Bumps every OTHER consumer project (per consumers.json) to a newly released tag,
   optionally re-syncing subagent defs. Hooks are never auto-applied to another
-  project — see SKILL.md Step 7.
+  project - see SKILL.md Step 7.
 
 .PARAMETER Tag
   The tag just released, e.g. v1.1.0
 
 .PARAMETER ExcludeProjectPaths
-  Project root path(s) to skip — the project the release was cut from, since it's
+  Project root path(s) to skip - the project the release was cut from, since it's
   already at this commit.
 
 .PARAMETER SyncAgents
-  Pass if this release changed anything in oracle-shared-skills\agents\ — re-runs
+  Pass if this release changed anything in oracle-shared-skills\agents\ - re-runs
   each other project's sync-agents.ps1 after the bump.
 
 .PARAMETER ConsumersJson
@@ -55,13 +55,13 @@ foreach ($c in $consumers) {
     # content change requires this regardless of what else changed.
     $skillsSyncScript = Join-Path $sub "scripts\sync-skills.ps1"
     if (Test-Path $skillsSyncScript) {
-        powershell -File $skillsSyncScript -ProjectRoot $c.path
+        pwsh -File $skillsSyncScript -ProjectRoot $c.path
     }
 
     if ($SyncAgents) {
         $syncScript = Join-Path $sub "scripts\sync-agents.ps1"
         if (Test-Path $syncScript) {
-            powershell -File $syncScript -ProjectRoot $c.path
+            pwsh -File $syncScript -ProjectRoot $c.path
         }
     }
 
@@ -69,4 +69,4 @@ foreach ($c in $consumers) {
     Write-Host ""
 }
 
-Write-Host "If this release changed hooks, apply them manually per project — see SKILL.md Step 7. Not automated here."
+Write-Host "If this release changed hooks, apply them manually per project - see SKILL.md Step 7. Not automated here."

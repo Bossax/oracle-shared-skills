@@ -45,5 +45,11 @@ Get-ChildItem $skillsSrc -Directory | ForEach-Object {
     }
 
     robocopy $_.FullName $dst /E /XD .venv __pycache__ /XF *.pyc /NFL /NDL /NJH /NJS | Out-Null
-    Write-Host "synced skill: $name -> $dst"
+
+    # This is a read-only mirror, not a source of truth - edits here would silently
+    # diverge and never reach the shared repo (unlike .claude\skills, still a live
+    # junction). Mark read-only so an accidental edit fails loudly instead.
+    Get-ChildItem $dst -Recurse -File | ForEach-Object { $_.IsReadOnly = $true }
+
+    Write-Host "synced skill: $name -> $dst (marked read-only)"
 }
