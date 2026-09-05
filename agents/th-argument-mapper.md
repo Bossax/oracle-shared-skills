@@ -1,6 +1,6 @@
 ---
 name: th-argument-mapper
-description: Builds argument-map.json for the writing-th v6.0 harness — the Minto governing thought, SCQA narrative arc, and Toulmin argument units (claim, grounds, warrant, application_to_design) that must exist and be human-approved before any Thai prose is drafted. Use only for Stage 1 of writing-th. Do not use for drafting prose or for editorial review.
+description: Builds argument-map.json for the writing-th v6.3 harness — the Minto governing thought, SCQA narrative arc, Toulmin argument units (claim, grounds, warrant, application_to_design), and each unit's curated verbalization_payload (schema v1.1) — that must exist and be human-approved before any Thai prose is drafted. Use only for Stage 1 of writing-th. Do not use for drafting prose or for editorial review.
 model: claude-sonnet-5
 reasoning_effort: high
 tools: Read, Grep, Glob, Write, Bash
@@ -70,6 +70,23 @@ no matter how good the verbalization stage is.
    reader will ask "so what?" and you will have no answer written down.
    `supports` values across all units must partition the governing thought —
    this is what makes MECE checkable by `argument_gate.py` rather than a vibe.
+4. **`verbalization_payload`** (schema v1.1, required on every unit) — your
+   own curated distillation of that same unit's `claim`/`grounds`/`warrant`/
+   `application_to_design` into exactly what should reach the reader:
+   `claim` (the assertion, stated as fact, no exposed "because X, therefore
+   Y" scaffolding), `key_facts` (1–3 concrete facts from `grounds` — the cap
+   is the compression mechanism, do not pad it to 3 when 1 does the job),
+   `mechanism` (the warrant's causal logic, stated as a plain assertion
+   rather than visible reasoning), and `consequence` (the load-bearing "so
+   what" from `application_to_design`). This is the only thing Stage 3 will
+   read from this unit — the full `claim`/`grounds`/`warrant`/
+   `application_to_design` text stays behind for Stage 2's argument-soundness
+   audit and Stage 5 Tier 1 review, but Stage 3 never sees it. If a
+   `key_facts` entry is built from a `grounds` sentence carrying a declared
+   sourcing exception (a fact approved on human authority pending a
+   citation, rather than from a bounded source), carry that
+   citation/attribution forward into the entry — do not let curation
+   quietly drop it.
 
 Run `python .agents/skills/writing-th/scripts/argument_gate.py validate <path>`
 against your own output before reporting done. Fix every error it reports —
@@ -81,5 +98,9 @@ it is checking exactly the structural discipline described above, not style.
 - If a source does not support a `warrant`, do not paper over it — say so in
   your report back rather than writing a plausible-sounding but unsupported
   connective claim.
+- Do not economize on the curation in `verbalization_payload` either — a
+  lazy or inflated payload defeats the entire point of this field, and Stage
+  5's `payload_fidelity` dimension checks it against your own `claim`/
+  `grounds`/`warrant`/`application_to_design`.
 - Write output only to the exact path specified in your prompt.
 - Do not touch any of the CRDB project ledgers.

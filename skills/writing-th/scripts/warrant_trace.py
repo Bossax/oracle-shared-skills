@@ -1,11 +1,19 @@
-"""Partial mechanical check: does each approved argument unit's claim show up
+"""Partial mechanical check: does each unit's verbalization_payload show up
 in the draft at all?
 
 This is deliberately a weak, cheap check -- token overlap, not meaning. It
 catches the case where a unit was silently dropped from verbalization
-entirely. It cannot tell you whether the draft faithfully carries a unit's
-*warrant* (the reasoning), only whether the unit's subject matter is present
-somewhere. Genuine Tier 2 fidelity judgment stays with th-editorial-reviewer.
+entirely. It checks against verbalization_payload (claim + key_facts +
+consequence) rather than the unit's raw claim, because that payload is what
+Stage 3 actually reads and verbalizes as of schema v1.1 -- the full
+grounds/warrant text never reaches Stage 3, so tracing against it would
+measure content the verbalizer never saw. On a pre-1.1 map missing
+verbalization_payload, this falls back to the raw claim so the tool degrades
+gracefully instead of crashing. It cannot tell you whether the draft
+faithfully carries a unit's *mechanism* (the warrant-derived reasoning),
+only whether the unit's payload content is present somewhere. Genuine Tier 2
+fidelity judgment (payload_fidelity, argument_fidelity) stays with
+th-editorial-reviewer.
 
 Usage:
     warrant_trace.py <argument-map.json> <draft.md>
@@ -36,6 +44,22 @@ def content_terms(text: str) -> set[str]:
     return {t for t in tokens if t not in STOPWORDS and THAI_OR_LATIN_WORD.fullmatch(t)}
 
 
+def payload_text(unit: dict) -> str:
+    """The text Stage 3 actually read for this unit: verbalization_payload's
+    claim + key_facts + consequence (schema v1.1). Falls back to the raw
+    claim on a pre-1.1 map that has no verbalization_payload, so this stays
+    an advisory tool rather than a hard dependency on the new field."""
+    payload = unit.get("verbalization_payload")
+    if not isinstance(payload, dict):
+        return unit.get("claim", "")
+    parts = [payload.get("claim", "")]
+    key_facts = payload.get("key_facts")
+    if isinstance(key_facts, list):
+        parts.extend(f for f in key_facts if isinstance(f, str))
+    parts.append(payload.get("consequence", ""))
+    return " ".join(p for p in parts if p)
+
+
 def load_json(path: str | Path) -> dict:
     with Path(path).open(encoding="utf-8") as handle:
         return json.load(handle)
@@ -54,16 +78,15 @@ def trace(map_path: str, draft_path: str) -> tuple[bool, list[str]]:
     missing = 0
     for unit in units:
         unit_id = unit.get("unit_id", "?")
-        claim = unit.get("claim", "")
-        terms = content_terms(claim)
+        terms = content_terms(payload_text(unit))
         if not terms:
-            findings.append(f"  {unit_id}: claim has no traceable content terms -- skipped")
+            findings.append(f"  {unit_id}: payload has no traceable content terms -- skipped")
             continue
         hits = terms & draft_terms
         coverage = len(hits) / len(terms)
         if coverage == 0:
             missing += 1
-            findings.append(f"  {unit_id}: NOT FOUND -- no claim terms appear in the draft "
+            findings.append(f"  {unit_id}: NOT FOUND -- no payload terms appear in the draft "
                              f"({sorted(terms)[:5]}...)")
         elif coverage < 0.34:
             findings.append(f"  {unit_id}: WEAK ({coverage:.0%} term overlap) -- "

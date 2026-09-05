@@ -17,7 +17,7 @@ import json
 import sys
 from pathlib import Path
 
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 PARAGRAPH_JOBS = {"define", "diagnose", "compare", "conclude"}
 
 UNIT_REQUIRED = (
@@ -28,8 +28,13 @@ UNIT_REQUIRED = (
     "grounds",
     "warrant",
     "application_to_design",
+    "verbalization_payload",
     "supports",
 )
+
+PAYLOAD_REQUIRED_STRINGS = ("claim", "mechanism", "consequence")
+PAYLOAD_KEY_FACTS_MAX = 3
+PAYLOAD_ADVISORY_CHAR_LIMIT = 600  # soft guideline: key_facts entries re-inflating into paragraphs
 
 
 def load_json(path: str | Path) -> dict:
@@ -40,8 +45,47 @@ def load_json(path: str | Path) -> dict:
     return data
 
 
-def validate_map(data: dict) -> list[str]:
+def validate_payload(unit_tag: str, payload: object, errors: list[str], advisories: list[str]) -> None:
+    """Structural check only, matching this script's existing philosophy:
+    verbalization_payload's shape is enforced here; whether its content is a
+    faithful, well-curated distillation of the unit's own claim/grounds/
+    warrant/application_to_design is Stage 5 Tier 1's payload_fidelity
+    dimension, not something this script can judge."""
+    tag = f"{unit_tag}.verbalization_payload"
+    if not isinstance(payload, dict):
+        errors.append(f"{tag} must be an object")
+        return
+
+    for key in PAYLOAD_REQUIRED_STRINGS:
+        value = payload.get(key)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{tag}.{key} must be a non-empty string")
+        elif len(value) > PAYLOAD_ADVISORY_CHAR_LIMIT:
+            advisories.append(
+                f"{tag}.{key} is {len(value)} characters -- re-check it hasn't "
+                f"re-inflated into paragraph-length prose")
+
+    key_facts = payload.get("key_facts")
+    if not isinstance(key_facts, list) or not key_facts:
+        errors.append(f"{tag}.key_facts must be a non-empty list")
+        key_facts = []
+    elif len(key_facts) > PAYLOAD_KEY_FACTS_MAX:
+        errors.append(
+            f"{tag}.key_facts has {len(key_facts)} entries -- capped at "
+            f"{PAYLOAD_KEY_FACTS_MAX}; this cap is the compression mechanism, "
+            f"not a formality")
+    for j, fact in enumerate(key_facts):
+        if not isinstance(fact, str) or not fact.strip():
+            errors.append(f"{tag}.key_facts[{j}] must be a non-empty string")
+        elif len(fact) > PAYLOAD_ADVISORY_CHAR_LIMIT:
+            advisories.append(
+                f"{tag}.key_facts[{j}] is {len(fact)} characters -- re-check it "
+                f"hasn't re-inflated into paragraph-length prose")
+
+
+def validate_map(data: dict) -> tuple[list[str], list[str]]:
     errors = []
+    advisories: list[str] = []
 
     if data.get("schema_version") != SCHEMA_VERSION:
         errors.append(f"schema_version must be {SCHEMA_VERSION}")
@@ -90,6 +134,8 @@ def validate_map(data: dict) -> list[str]:
             if not isinstance(unit[key], str) or not unit[key].strip():
                 errors.append(f"{tag}.{key} must be a non-empty string")
 
+        validate_payload(tag, unit["verbalization_payload"], errors, advisories)
+
         unit_id = unit["unit_id"]
         if not isinstance(unit_id, str) or not unit_id.strip():
             errors.append(f"{tag}.unit_id must be a non-empty string")
@@ -129,7 +175,7 @@ def validate_map(data: dict) -> list[str]:
             f"MECE coverage is incomplete"
         )
 
-    return errors
+    return errors, advisories
 
 
 def command_validate(ns: argparse.Namespace) -> int:
@@ -138,12 +184,16 @@ def command_validate(ns: argparse.Namespace) -> int:
     except (OSError, ValueError, json.JSONDecodeError) as err:
         print(f"REFUSED: {err}")
         return 1
-    errors = validate_map(data)
+    errors, advisories = validate_map(data)
     if errors:
         print(f"ARGUMENT GATE FAILED -- {len(errors)} issue(s)")
         for error in errors:
             print(f"  - {error}")
         return 1
+    if advisories:
+        print(f"{len(advisories)} advisory item(s) (not blocking):")
+        for advisory in advisories:
+            print(f"  - {advisory}")
     print(f"ARGUMENT GATE PASSED ({len(data.get('argument_units', []))} unit(s))")
     return 0
 
