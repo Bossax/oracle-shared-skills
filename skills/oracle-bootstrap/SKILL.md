@@ -193,7 +193,24 @@ From the target project root:
    ```powershell
    pwsh -File .oracle-shared-skills\scripts\sync-skills.ps1 -ProjectRoot (Get-Location).Path
    ```
-4. Register the new consumer in `C:\Users\sitth\OracleWorkspace\oracle-shared-skills\consumers.json`.
+4. Populate `.claude/agents` for shared subagents:
+   ```powershell
+   pwsh -File .oracle-shared-skills\scripts\sync-agents.ps1 -ProjectRoot (Get-Location).Path
+   ```
+5. Update `.gitignore` to keep local machine configs and junctioned skills clean:
+   ```gitignore
+   # Local client configs (machine-specific)
+   .mcp.json
+   .codex/
+   .gemini/
+   .agents/
+   .claude/settings.local.json
+   .claude/skills/style-capture/
+   .claude/skills/writing-th/
+   .claude/skills/shared-skill-release/
+   .claude/skills/oracle-bootstrap/
+   ```
+6. Register the new consumer in `C:\Users\sitth\OracleWorkspace\oracle-shared-skills\consumers.json`.
 
 ---
 
@@ -205,4 +222,7 @@ From the target project root:
    ```
 2. Call `oracle_learn` with a test pattern and verify the response contains:
    `"embedding": "ok"`
-3. Confirm that all three client configurations exist on disk and no em dashes exist in `AGENTS.md`.
+3. Verify client discovery:
+   - Antigravity / Codex: inspect `.agents/skills/` (confirm files exist as real directories, not broken links).
+   - Claude Code: verify `.claude/skills/` junctions resolve.
+4. Confirm that all three client configurations exist on disk and no em dashes exist in `AGENTS.md`.
