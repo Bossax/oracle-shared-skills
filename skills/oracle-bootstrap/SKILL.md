@@ -74,7 +74,12 @@ Ensure `<project root>/CLAUDE.md` contains only:
 
 ## Step 2: Multi-Client MCP Configuration
 
-Provision the configuration files for all three clients pointing to the new Docker service container.
+Create client directories and provision configuration files pointing to the new Docker service container.
+
+```powershell
+# Create client configuration directories
+New-Item -ItemType Directory -Force -Path ".agents", ".gemini", ".codex"
+```
 
 ### 1. Claude Code: `<project root>/.mcp.json`
 ```json
@@ -96,7 +101,7 @@ Provision the configuration files for all three clients pointing to the new Dock
 }
 ```
 
-### 2. Antigravity: `<project root>/.gemini/mcp_config.json` and `.agents/mcp_config.json`
+### 2. Antigravity: `<project root>/.gemini/mcp_config.json` and `<project root>/.agents/mcp_config.json`
 ```json
 {
   "mcpServers": {
