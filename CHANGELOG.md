@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.0 - 2026-09-21
+
+Added `skills/oracle-bootstrap/` skill and registered `Keth-goverment-agent` in `consumers.json`.
+
+- Added `skills/oracle-bootstrap/SKILL.md`: workflow for provisioning newly awakened Oracle repos with Docker MCP integration, multi-client configurations (Claude Code, Codex, Antigravity), shared skills synchronization, and grounded behavioral rules.
+- Updated `consumers.json`: registered `Keth-goverment-agent` as a consumer repository.
+
 ## v1.2.1 — 2026-09-05
 
 **Bug fix**: every `powershell -File ...` invocation documented in
