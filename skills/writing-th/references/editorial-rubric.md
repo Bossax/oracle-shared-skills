@@ -70,6 +70,13 @@ Every review must decide each dimension with `pass`, `fail`, or, where allowed,
    match the information shape. No rule against rhetorical enumeration may be
    misapplied as a ban on useful lists.
 
+10. **reader_onboarding_and_transition** — Before unfamiliar technical models,
+    frameworks, classifications, or system components appear, the prose gives
+    the reader a functional point of entry, explains the limitation of the
+    immediately preceding artifact or evidence, and makes the next concept
+    necessary. Fail abrupt jumps from requirements, dataset lists, or abstract
+    claims into technical detail, as well as transitions that merely name a
+    relation without explaining it.
 ## Executive-summary profile
 
 Apply these additional dimensions when `profile` is `executive-summary`:

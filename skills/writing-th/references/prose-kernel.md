@@ -34,6 +34,11 @@ lint finding wins — it is checking the live lexicon, this file is a snapshot.
 10. **Simplified technical prose** — cut prestige descriptors (`ขั้นสูง`,
     `ที่สำคัญที่สุด`) unless the distinction is materially necessary.
 
+### Mandatory reader-onboarding bridge
+
+Before introducing an unfamiliar model, framework, data classification, or system component, establish in order: (a) the reader-visible function or problem, (b) why the immediately available artifact, list, or view cannot resolve it alone, and (c) the work performed by the next concept. Define components only after that bridge makes the concept necessary. Do not jump from a requirement or dataset list directly into a technical term.
+
+
 ## Thai Sentence Shape Guardrails
 
 - Start with the real subject, institution, dataset, or finding.
@@ -66,6 +71,8 @@ lint finding wins — it is checking the live lexicon, this file is a snapshot.
   service, or example.
 - Don't name only a direction in a recommendation — name the artifact, owner,
   or mechanism.
+- Don't introduce a technical model, framework, or classification immediately after a requirement or data list. First tell the reader what the preceding artifact does not yet answer, then use a causal bridge to introduce the next concept.
+
 - Don't append repetitive case study names to universal recommendation lists.
 - Don't compress multiple service gaps into one dense paragraph when the
   distinctions matter to the reader.
