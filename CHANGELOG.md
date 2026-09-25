@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.3 — 2026-09-25
+
+**Recovery, no new change**: recovered a second orphaned commit
+("upgrade writing-th: fix loose argument structure to precisely surface
+desired proses", 2026-09-05, made directly against a detached-HEAD
+checkout in `Susu_Ocean`) that would have been lost on that project's next
+fast-forward during v1.2.2's propagation. Cherry-picked onto `main`
+unchanged — improves `th-argument-mapper.md`, `th-editorial-reviewer.md`,
+`th-verbalizer.md`, `argument_gate.py`, `warrant_trace.py`, and their test
+suite. No relation to v1.2.2's own changes; found only because propagating
+v1.2.2 surfaced it the same way v1.2.2 itself surfaced the first orphaned
+commit.
+
 ## v1.2.2 — 2026-09-25
 
 **Bug fix (writing-th)**: `lint_thai_writing.py`'s STYLE_PACK_TH §7 contrast
