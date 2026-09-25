@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.2.2 — 2026-09-25
+
+**Bug fix (writing-th)**: `lint_thai_writing.py`'s STYLE_PACK_TH §7 contrast
+check ("ไม่ใช่ [X] แต่ [Y]" / contrastive negative scaffolding, a CRITICAL
+DON'T Boss confirmed 2026-08-30) only matched the two-clause `...แต่...`
+template within 60 characters. Found via a live CRDB §5.1 draft
+(`draft-v2.md`, 2026-09-25) with 5 instances of this already-established
+rule violated, none caught by the old regex — all were the standalone
+form: a clause negating an alternative reading (`...ไม่ใช่ [NP]`) with no
+`แต่` anchor nearby. Added `ไม่ใช่ว่า` (an unambiguous idiom marker) to the
+blocking regex outright, and added the bare standalone form as a new
+non-blocking `[CONTRAST-STANDALONE]` review item — non-blocking because a
+bare `ไม่ใช่ NP` is sometimes plain factual negation and needs human/agent
+judgment rather than a mechanical fail.
+
+**Content addition (writing-th)**: recovered a commit made in a parallel
+session ("learn writingstyle from 2.3.1 chapter") that had gone orphaned
+on a detached-HEAD checkout and would otherwise have been lost on the next
+fast-forward. Adds dimension 10, `reader_onboarding_and_transition`, to
+`editorial-rubric.md`'s Tier 2 review, and a matching "Mandatory
+reader-onboarding bridge" section to `prose-kernel.md` — both require that
+prose establish a reader-visible function/problem and why the preceding
+artifact can't resolve it alone before introducing an unfamiliar technical
+model, framework, or classification.
+
+No interface or CLI change in either fix.
+
 ## v1.2.1 — 2026-09-05
 
 **Bug fix**: every `powershell -File ...` invocation documented in

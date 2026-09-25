@@ -41,6 +41,14 @@ ACRONYM_PLURAL = re.compile(r"[A-Z]{2,}s")
 VERSION = re.compile(r"v?[0-9][0-9.]*")
 
 
+# STYLE_PACK_TH §7 CRITICAL DON'T (Boss confirmed 2026-08-30): "ไม่ใช่ [X] แต่ [Y]" or
+# contrastive negative scaffolding -- explain by negating an alternative reading
+# instead of stating the affirmative directly. Shared between the blocking two-clause
+# check and the non-blocking standalone-clause review below.
+CONTRAST = re.compile(
+    r"ไม่ได้.{0,60}?แต่|ไม่ใช่.{0,60}?แต่|ไม่ควรถูกมองเป็น.{0,60}?แต่|ไม่ใช่ว่า"
+)
+
 # Spans that are not prose and must not be linted: code, link targets, paths, URLs.
 # A banned term inside a file path is not a style violation -- that false positive
 # is why README.md failed on `[[ψ/incubate/DCCE/CRDB/...]]`.
@@ -122,11 +130,10 @@ def check_parentheticals(text, translations):
 def check_sentence_structures(sentences):
     """Structural patterns that must be scoped to one sentence, not one paragraph."""
     errors = []
-    contrast = re.compile(r"ไม่ได้.{0,60}?แต่|ไม่ใช่.{0,60}?แต่|ไม่ควรถูกมองเป็น.{0,60}?แต่")
     passive = re.compile(r"ถูก(ดำเนินการ|จัดทำ|สร้าง|พัฒนา|มองว่า|ถือว่า|ออกแบบให้)")
 
     for s in sentences:
-        if contrast.search(s):
+        if CONTRAST.search(s):
             errors.append(
                 f"[CONTRAST] translated contrast scaffolding in: '{s.strip()[:70]}...' "
                 f"State the affirmative directly.")
@@ -150,8 +157,21 @@ def check_editorial_review_patterns(sentences):
         r"(หัวข้อ|ส่วน)(ถัดไป|ต่อไป|ที่\s*\d+).{0,80}(กล่าวถึง|นำเสนอ|ครอบคลุม)|"
         r"รายงานฉบับนี้.{0,80}(จัดเรียงเนื้อหา|ประกอบด้วยหัวข้อ))"
     )
+    # Standalone form of the same STYLE_PACK_TH §7 tic the blocking CONTRAST regex
+    # catches: a clause negates an alternative reading ("...ไม่ใช่ [NP]") with no
+    # "แต่" nearby to anchor a real two-clause contrast. Flagged for review rather
+    # than blocked outright -- unlike the "...แต่..." template, a bare "ไม่ใช่ NP"
+    # is sometimes a plain factual negation, so this needs a human/agent judgment
+    # call, not a mechanical fail. Found repeatedly in CRDB §5.1 draft-v2.md
+    # (2026-09-25) despite the rule being a CRITICAL DON'T since 2026-08-30.
+    standalone_negation = re.compile(r"ไม่ใช่(?!ว่า)")
     for sentence in sentences:
         clean = sentence.strip()
+        if standalone_negation.search(clean) and not CONTRAST.search(clean):
+            reviews.append(
+                f"[CONTRAST-STANDALONE] possible negated-alternative scaffolding "
+                f"(STYLE_PACK_TH §7 CRITICAL DON'T): '{clean[:90]}...' "
+                f"State the affirmative directly instead of naming what it is not.")
         if clean.count("→") >= 2:
             reviews.append(
                 f"[ARTIFACT] inline arrow chain may be a diagram rendered as prose: "
