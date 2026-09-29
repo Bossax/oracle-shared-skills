@@ -127,6 +127,13 @@ def main():
     if subagent_harness.returncode:
         sys.exit(subagent_harness.returncode)
 
+    exceptions_harness = subprocess.run(
+        [child_python(), str(TESTS / "test_lint_exceptions.py")],
+        capture_output=True, text=True, encoding="utf-8", errors="replace")
+    print((exceptions_harness.stdout + exceptions_harness.stderr).rstrip())
+    if exceptions_harness.returncode:
+        sys.exit(exceptions_harness.returncode)
+
     register_harness = subprocess.run(
         [child_python(), str(TESTS / "test_register.py")],
         capture_output=True, text=True, encoding="utf-8", errors="replace")

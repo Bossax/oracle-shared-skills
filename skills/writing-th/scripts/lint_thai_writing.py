@@ -86,21 +86,24 @@ def token_boundaries(text):
     return bounds
 
 
-def find_literal(text, needle, bounds):
+def find_literal(text, needle, bounds, exceptions=()):
     """Occurrences of `needle` that align to token boundaries.
 
     Latin terms use word boundaries directly -- `DCCE` must not fire inside
     `DCCE_ARCHIVE` or a URL, and the tokenizer is not reliable on Latin runs.
+    A hit lying wholly inside an occurrence of one of the entry's `exceptions`
+    (e.g. `ฉบับ` inside `รายงานฉบับกลาง`) is legitimate usage and is dropped.
     """
     if LATIN.search(needle) and not THAI.search(needle):
         pattern = r"(?<![A-Za-z0-9])" + re.escape(needle) + r"(?![A-Za-z0-9])"
-        return [m.start() for m in re.finditer(pattern, text)]
+        hits = [m.start() for m in re.finditer(pattern, text)]
+    else:
+        hits = [m.start() for m in re.finditer(re.escape(needle), text)
+                if m.start() in bounds and m.end() in bounds]
 
-    hits = []
-    for m in re.finditer(re.escape(needle), text):
-        if m.start() in bounds and m.end() in bounds:
-            hits.append(m.start())
-    return hits
+    spans = [m.span() for exc in exceptions for m in re.finditer(re.escape(exc), text)]
+    return [h for h in hits
+            if not any(s <= h and h + len(needle) <= e for s, e in spans)]
 
 
 def check_parentheticals(text, translations):
@@ -209,7 +212,7 @@ def lint(draft_path, lexicon_path, scope="report", register_run=False):
         kind, banned = e["kind"], e["banned"]
 
         if kind == "literal":
-            if find_literal(text, banned, bounds):
+            if find_literal(text, banned, bounds, e.get("exceptions", ())):
                 errors.append(
                     f"[LEXICON] '{banned}' -> use '{e['preferred']}'. ({e['reason']})")
                 fired.append((banned, "literal"))

@@ -72,6 +72,18 @@ def validate(path):
                     f"Either ban the stem exactly, or use kind=regex with a pattern.")
             if len(banned) > 80:
                 warnings.append(f"{tag}: literal is {len(banned)} chars -- suspiciously long for a term")
+            exc = e.get("exceptions")
+            if exc is not None:
+                if not isinstance(exc, list) or not all(isinstance(x, str) and x for x in exc):
+                    errors.append(f"{tag}: exceptions must be a list of non-empty strings")
+                else:
+                    # an exception that doesn't contain the banned term can never mask a hit
+                    dead = [x for x in exc if banned not in x]
+                    if dead:
+                        errors.append(f"{tag}: exceptions {dead} do not contain {banned!r} -- they can never apply")
+
+        if "exceptions" in e and kind != "literal":
+            errors.append(f"{tag}: `exceptions` is only supported on kind=literal")
 
         elif kind == "regex":
             if "pattern" not in e:

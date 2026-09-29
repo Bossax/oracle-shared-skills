@@ -107,6 +107,23 @@ project's agent into another project. `scripts/sync-agents.ps1` copies only the
 files that live in this repo's own `agents/` folder — it never touches anything
 else in the target directory.
 
+## Global agents (`global-agents/`)
+
+`global-agents/` holds agent definitions installed at user scope, not per project.
+The first is `thai-writer`, a Thai writing expert for polishing, revising,
+translating, and drafting. These files live apart from `agents/` so that
+`sync-agents.ps1` never copies them into a project's `.claude\agents\`, where a
+project copy would shadow the global one and go stale. To install or update one:
+
+```
+Copy-Item .oracle-shared-skills\global-agents\thai-writer.md $HOME\.claude\agents\ -Force
+```
+
+Antigravity and Codex have no user-scope agent folder. They load the file's body
+from this path as the role prompt. The agent contains no project content: it
+finds a project's style data (`ψ/memory/style/`, `ψ/memory/resonance/`) at
+runtime.
+
 ## Scope — what does and doesn't live here
 
 **In scope:** skill definitions (`SKILL.md`), their scripts, references, tests,
