@@ -45,6 +45,10 @@ their content is authored. Consuming projects reference it, they don't fork it.
    `.claude\settings.local.json` (merge the `hooks` key in by hand, or run
    `skills\writing-th\setup\merge-hooks.ps1`). This wires the PreToolUse/PostToolUse
    gates that actually enforce `writing-th`'s draft-preconditions/lint rules.
+   The hook commands use `$CLAUDE_PROJECT_DIR` so they resolve from any working
+   directory (Claude Code runs hooks through bash and sets that variable to the
+   project root). A relative `.agents/...` path fails with "can't open file" as
+   soon as the session's shell is in a subfolder.
 6. Set up the Python environment writing-th's scripts need:
    ```
    python -m venv .oracle-shared-skills\skills\writing-th\.venv

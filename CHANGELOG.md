@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.5 — 2026-09-29
+
+**Fix**: `skills/writing-th/setup/settings.local.hooks.json` now runs both hook
+scripts through `$CLAUDE_PROJECT_DIR`
+(`python "$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/..."`) instead of the
+relative `python .agents/skills/writing-th/scripts/...`. With the relative path,
+both hooks failed with "can't open file" whenever the session's shell had changed
+into a subfolder, because hook commands run from the session's working directory.
+Verified in `Arun_Creagy`: from a subfolder working directory the PreToolUse gate
+passes and the PostToolUse lint runs and reports violations; a diagnostic run
+showed the hook shell is bash with `CLAUDE_PROJECT_DIR` set to the project root.
+Projects that already merged the old hooks need to re-run `merge-hooks.ps1` (or
+edit the two commands by hand) — hooks are never propagated automatically.
+
 ## v1.2.4 — 2026-09-29
 
 **Docs fix, plus the previously untagged `thai-writer` agent commit.**

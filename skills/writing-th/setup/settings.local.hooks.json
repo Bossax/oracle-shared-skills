@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .agents/skills/writing-th/scripts/check_draft_preconditions.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/check_draft_preconditions.py\"",
             "timeout": 15,
             "statusMessage": "Checking argument-map gate..."
           }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .agents/skills/writing-th/scripts/post_draft_lint.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/post_draft_lint.py\"",
             "timeout": 30,
             "statusMessage": "Linting Thai draft..."
           }
