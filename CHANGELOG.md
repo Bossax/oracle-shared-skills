@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.2.4 — 2026-09-29
+
+**Docs fix, plus the previously untagged `thai-writer` agent commit.**
+
+- `README.md` step 6: document the `.venv` junction that the `.agents\skills\writing-th`
+  copy needs. The writing-th hooks run the scripts from that copy, and
+  `scripts\_venv.py` looks for `.venv` only next to its own skill folder.
+  `sync-skills.ps1` skips `.venv` on purpose, so the copy had no interpreter and
+  every hook and lint run failed with "the skill venv is missing", even though the
+  venv existed at `.oracle-shared-skills\skills\writing-th\.venv`. The fix is a
+  junction from the copy's `.venv` to the shared one (absolute paths). The copy
+  stays a real copy; re-running `sync-skills.ps1` does not remove the junction.
+- Includes commit `996b19c` ("add thai-writer agent"), which was committed to `main`
+  after v1.2.3 but never tagged. No other content change in this release.
+
 ## v1.2.3 — 2026-09-25
 
 **Recovery, no new change**: recovered a second orphaned commit

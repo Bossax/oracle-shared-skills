@@ -50,6 +50,17 @@ their content is authored. Consuming projects reference it, they don't fork it.
    python -m venv .oracle-shared-skills\skills\writing-th\.venv
    .oracle-shared-skills\skills\writing-th\.venv\Scripts\python -m pip install -r .oracle-shared-skills\skills\writing-th\scripts\requirements.txt
    ```
+   The hooks in step 5 run the scripts from the `.agents\skills\writing-th`
+   copy, and `scripts\_venv.py` looks for `.venv` only next to its own skill
+   folder. `sync-skills.ps1` skips `.venv` on purpose (a venv is tied to the
+   path it was created at), so the copy has no interpreter and the hooks fail
+   with "the skill venv is missing". Give the copy a junction to the venv you
+   just created (junction targets must be absolute paths):
+   ```
+   New-Item -ItemType Junction -Path "<project root>\.agents\skills\writing-th\.venv" -Target "<project root>\.oracle-shared-skills\skills\writing-th\.venv"
+   ```
+   Re-running `sync-skills.ps1` leaves the junction alone (`/XD .venv`). The
+   copy stays a real copy; only `.venv` is linked.
 7. Verify: `python .oracle-shared-skills\skills\writing-th\tests\run_tests.py -v`
 
 ## The path-depth invariant (important — don't restructure lightly)
