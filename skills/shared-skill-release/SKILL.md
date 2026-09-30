@@ -1,7 +1,7 @@
 ---
 name: shared-skill-release
 description: >
-  v1.0.0 | Release a change made to a skill in oracle-shared-skills (style-capture,
+  v1.1.0 | Release a change made to a skill in oracle-shared-skills (style-capture,
   writing-th, or a future one) and propagate it to every consumer project. Use when
   the user says "release shared skill", "publish skill change", "sync shared skill",
   "propagate skill update", or has just finished validating an edit made through a
@@ -50,7 +50,7 @@ just ahead of that tag). If git reports a conflict here, stop and resolve it wit
 user rather than forcing past it — do not use `git checkout -f` or similar to bulldoze
 local changes.
 
-## Step 2 — Detect drift in the two things that don't auto-propagate
+## Step 2 - Detect drift in the things that do not auto-propagate
 
 Run:
 
@@ -58,21 +58,25 @@ Run:
 pwsh -File skills\shared-skill-release\scripts\detect-drift.ps1 -ProjectRoot <project root>
 ```
 
-This checks two categories that junctions do **not** cover:
+This checks categories that junctions do not cover:
 
-1. **Subagent defs** — files in `<project>\.claude\agents\*.md` that are new or
+1. **Subagent defs** - files in `<project>\.claude\agents\*.md` that are new or
    changed relative to `oracle-shared-skills\agents\`.
-2. **Hooks** — whether `<project>\.claude\settings.local.json`'s `hooks` key differs
+2. **Hooks** - whether `<project>\.claude\settings.local.json`'s `hooks` key differs
    from `skills\writing-th\setup\settings.local.hooks.json`.
+3. **Global agent defs** - whether `$HOME\.claude\agents\*.md` differs from
+   `oracle-shared-skills\global-agents\`.
 
 For anything it reports, ask the user (AskUserQuestion) whether it belongs in this
 release:
-- A new/changed subagent file the user actually wants shared → copy it into
+- A new or changed subagent file the user wants shared -> copy it into
   `oracle-shared-skills\agents\<name>.md`.
-- A new/changed hook the user wants shared → update
+- A new or changed global agent file the user wants shared -> copy it into
+  `oracle-shared-skills\global-agents\<name>.md`.
+- A new or changed hook the user wants shared -> update
   `skills\writing-th\setup\settings.local.hooks.json` (or the equivalent setup file
   for whichever skill owns it) to match.
-- Anything the user says is project-specific → leave it alone, don't copy it in.
+- Anything the user says is project-specific -> leave it alone, do not copy it in.
 
 ## Step 3 — Review the diff and decide the version bump
 
@@ -105,10 +109,10 @@ git add .oracle-shared-skills
 git commit -m "bump oracle-shared-skills to vX.Y.Z"
 ```
 
-## Step 6 — Propagate to every other consumer project
+## Step 6 - Propagate to every other consumer project
 
 ```
-pwsh -File <project>\.oracle-shared-skills\skills\shared-skill-release\scripts\propagate.ps1 -Tag vX.Y.Z -ExcludeProjectPaths <project> -SyncAgents:<$true if Step 2 added/changed a subagent file, else $false>
+pwsh -File <project>\.oracle-shared-skills\skills\shared-skill-release\scripts\propagate.ps1 -Tag vX.Y.Z -ExcludeProjectPaths <project> -SyncAgents:<$true if Step 2 added/changed a subagent file, else $false> -SyncGlobalAgents:<$true if Step 2 added/changed a global agent file, else $false>
 ```
 
 This walks `consumers.json`, and for every project other than the one just released

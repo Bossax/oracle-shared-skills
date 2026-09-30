@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.4.0 - 2026-09-30
+
+Added global agent synchronization to shared-skill-release and registered `Jiu-climate-risk-and-resilience` in `consumers.json`.
+
+- Added `scripts/sync-global-agents.ps1`: copies global agent definitions from `global-agents/` into `$HOME\.claude\agents/`.
+- Updated `skills/shared-skill-release/scripts/detect-drift.ps1`: added drift detection between `global-agents/` and `$HOME\.claude\agents/`.
+- Updated `skills/shared-skill-release/scripts/propagate.ps1`: added `-SyncGlobalAgents` switch to automatically synchronize global agents during release propagation.
+- Updated `skills/shared-skill-release/` (bumped to v1.1.0) and `README.md`: documented global agent synchronization and propagation.
+- Updated `consumers.json`: registered `Jiu-climate-risk-and-resilience` as a consumer repository.
+
 ## v1.3.0 — 2026-09-21
 
 Added `skills/oracle-bootstrap/` skill and registered `Keth-goverment-agent` in `consumers.json`.

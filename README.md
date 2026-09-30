@@ -128,11 +128,13 @@ else in the target directory.
 The first is `thai-writer`, a Thai writing expert for polishing, revising,
 translating, and drafting. These files live apart from `agents/` so that
 `sync-agents.ps1` never copies them into a project's `.claude\agents\`, where a
-project copy would shadow the global one and go stale. To install or update one:
+project copy would shadow the global one and go stale. To install or update:
 
+```powershell
+pwsh -File .oracle-shared-skills\scripts\sync-global-agents.ps1
 ```
-Copy-Item .oracle-shared-skills\global-agents\thai-writer.md $HOME\.claude\agents\ -Force
-```
+
+`shared-skill-release` also detects drift between `global-agents/` and `$HOME\.claude\agents\`, and `propagate.ps1 -SyncGlobalAgents` automatically syncs them during release propagation.
 
 Antigravity and Codex have no user-scope agent folder. They load the file's body
 from this path as the role prompt. The agent contains no project content: it

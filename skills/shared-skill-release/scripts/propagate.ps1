@@ -15,16 +15,21 @@
   Pass if this release changed anything in oracle-shared-skills\agents\ - re-runs
   each other project's sync-agents.ps1 after the bump.
 
+.PARAMETER SyncGlobalAgents
+  Pass if this release changed anything in oracle-shared-skills\global-agents\ - runs
+  sync-global-agents.ps1 to update $HOME\.claude\agents\.
+
 .PARAMETER ConsumersJson
   Path to consumers.json. Defaults to the one at the root of this shared repo.
 
 .EXAMPLE
-  .\propagate.ps1 -Tag v1.1.0 -ExcludeProjectPaths "C:\Users\sitth\OracleWorkspace\Arun_Creagy" -SyncAgents
+  .\propagate.ps1 -Tag v1.1.0 -ExcludeProjectPaths "C:\Users\sitth\OracleWorkspace\Arun_Creagy" -SyncAgents -SyncGlobalAgents
 #>
 param(
     [Parameter(Mandatory = $true)][string]$Tag,
     [string[]]$ExcludeProjectPaths = @(),
     [switch]$SyncAgents,
+    [switch]$SyncGlobalAgents,
     [string]$ConsumersJson = (Join-Path $PSScriptRoot "..\..\..\consumers.json")
 )
 
@@ -69,4 +74,18 @@ foreach ($c in $consumers) {
     Write-Host ""
 }
 
+if ($SyncGlobalAgents) {
+    # Resolve scripts\sync-global-agents.ps1 relative to this repo root
+    $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
+    $globalSyncScript = Join-Path $repoRoot "scripts\sync-global-agents.ps1"
+    if (Test-Path $globalSyncScript) {
+        Write-Host "=== Syncing global agents to `$HOME\.claude\agents ==="
+        pwsh -File $globalSyncScript
+        Write-Host ""
+    } else {
+        Write-Host "sync-global-agents.ps1 not found at $globalSyncScript."
+    }
+}
+
 Write-Host "If this release changed hooks, apply them manually per project - see SKILL.md Step 7. Not automated here."
+

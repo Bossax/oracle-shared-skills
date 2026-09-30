@@ -14,11 +14,17 @@ param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot
 )
 
-$sharedRoot    = Join-Path $ProjectRoot ".oracle-shared-skills"
+$sharedRoot    = if (Test-Path (Join-Path $ProjectRoot ".oracle-shared-skills")) {
+    Join-Path $ProjectRoot ".oracle-shared-skills"
+} else {
+    $ProjectRoot
+}
 $sharedSkills  = Join-Path $sharedRoot "skills"
 $projectAgentSkills = Join-Path $ProjectRoot ".agents\skills"
 $sharedAgents  = Join-Path $sharedRoot "agents"
 $projectAgents = Join-Path $ProjectRoot ".claude\agents"
+$sharedGlobalAgents = Join-Path $sharedRoot "global-agents"
+$userGlobalAgents   = Join-Path $HOME ".claude\agents"
 
 Write-Host "=== .agents\skills drift (should be an exact, read-only mirror of oracle-shared-skills\skills) ==="
 $foundSkillsDrift = $false
@@ -87,3 +93,25 @@ if ((Test-Path $settingsPath) -and (Test-Path $hooksTemplate)) {
 } else {
     Write-Host "  could not compare (missing settings.local.json or template)"
 }
+
+Write-Host ""
+Write-Host "=== Global agent drift ($HOME\.claude\agents vs oracle-shared-skills\global-agents) ==="
+$foundGlobalDrift = $false
+if (Test-Path $sharedGlobalAgents) {
+    Get-ChildItem $sharedGlobalAgents -Filter "*.md" | ForEach-Object {
+        $userFile = Join-Path $userGlobalAgents $_.Name
+        if (-not (Test-Path $userFile)) {
+            Write-Host "  MISSING IN USER FOLDER: $($_.Name) not in $userGlobalAgents (run sync-global-agents.ps1)"
+            $foundGlobalDrift = $true
+        } else {
+            $userHash   = (Get-FileHash $userFile -Algorithm SHA256).Hash
+            $sharedHash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            if ($userHash -ne $sharedHash) {
+                Write-Host "  DIFFERENT: $($_.Name) differs between shared repo and $userGlobalAgents"
+                $foundGlobalDrift = $true
+            }
+        }
+    }
+}
+if (-not $foundGlobalDrift) { Write-Host "  none" }
+
