@@ -34,14 +34,12 @@ their content is authored. Consuming projects reference it, they don't fork it.
    ```
    Junctions need no admin rights or Developer Mode (unlike symlinks), and Claude
    Code resolves them transparently.
-3. Populate `.agents\skills\<name>` as real copies (not junctions) via
-   `scripts\sync-skills.ps1 -ProjectRoot <project root>` — see "Why .agents\skills
-   is copied, not junctioned" below. Re-run after any change to a skill's content.
-4. Run `scripts\sync-agents.ps1 -ProjectRoot <project root>` to copy the shared
-   subagent definitions into `.claude\agents\` (these are small individual files
-   mixed into a directory that also holds project-specific agents, so they're
-   copied, not junctioned — see "Why subagents are copied, not junctioned" below).
-5. Apply `skills\writing-th\setup\settings.local.hooks.json` to the project's
+3. Populate `.agents\skills\<name>` as real copies and provision multi-client subagents via:
+   ```
+   tools\sync-skills.ps1 -ProjectRoot <project root>
+   ```
+   This automatically synchronizes skills to `.agents\skills`, copies Markdown subagents to `.claude\agents` and `.agents\agents`, copies TOML subagents to `.codex\agents`, and purges any retired agents.
+4. Apply `skills\writing-th\setup\settings.local.hooks.json` to the project's
    `.claude\settings.local.json` (merge the `hooks` key in by hand, or run
    `skills\writing-th\setup\merge-hooks.ps1`). This wires the PreToolUse/PostToolUse
    gates that actually enforce `writing-th`'s draft-preconditions/lint rules.

@@ -1,8 +1,7 @@
 <#
 .SYNOPSIS
-  Detects drift in the things that are NOT covered by junctions: subagent
-  definitions in .claude\agents\, hooks in .claude\settings.local.json, and
-  accidental edits to the read-only .agents\skills\ mirror.
+  Detects drift in assets not covered by junctions: .agents\skills\ mirror,
+  multi-client subagent definitions (.claude, .agents, .codex), and hooks.
 
 .PARAMETER ProjectRoot
   Root of the project to check, e.g. C:\Users\sitth\OracleWorkspace\Arun_Creagy
@@ -14,26 +13,28 @@ param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot
 )
 
-$sharedRoot    = if (Test-Path (Join-Path $ProjectRoot ".oracle-shared-skills")) {
+$sharedRoot = if (Test-Path (Join-Path $ProjectRoot ".oracle-shared-skills")) {
     Join-Path $ProjectRoot ".oracle-shared-skills"
 } else {
     $ProjectRoot
 }
 $sharedSkills  = Join-Path $sharedRoot "skills"
-$projectAgentSkills = Join-Path $ProjectRoot ".agents\skills"
 $sharedAgents  = Join-Path $sharedRoot "agents"
-$projectAgents = Join-Path $ProjectRoot ".claude\agents"
-$sharedGlobalAgents = Join-Path $sharedRoot "global-agents"
-$userGlobalAgents   = Join-Path $HOME ".claude\agents"
 
-Write-Host "=== .agents\skills drift (should be an exact, read-only mirror of oracle-shared-skills\skills) ==="
+$projectAgentSkills = Join-Path $ProjectRoot ".agents\skills"
+$projectClaudeAgents = Join-Path $ProjectRoot ".claude\agents"
+$projectAgyAgents    = Join-Path $ProjectRoot ".agents\agents"
+$projectCodexAgents  = Join-Path $ProjectRoot ".codex\agents"
+
+# 1. Skills Drift
+Write-Host "=== .agents\skills drift (vs oracle-shared-skills\skills) ==="
 $foundSkillsDrift = $false
 if (Test-Path $sharedSkills) {
     Get-ChildItem $sharedSkills -Directory | ForEach-Object {
         $name = $_.Name
         $localDir = Join-Path $projectAgentSkills $name
         if (-not (Test-Path $localDir)) {
-            Write-Host "  MISSING: $name not in .agents\skills - run sync-skills.ps1"
+            Write-Host "  MISSING: $name not in .agents\skills - run tools\sync-skills.ps1"
             $foundSkillsDrift = $true
             return
         }
@@ -42,11 +43,10 @@ if (Test-Path $sharedSkills) {
             $rel = $sf.FullName.Substring($_.FullName.Length)
             $lf = Join-Path $localDir $rel.TrimStart('\')
             if (-not (Test-Path $lf)) {
-                Write-Host "  MISSING FILE: $name$rel - run sync-skills.ps1"
+                Write-Host "  MISSING FILE: $name$rel - run tools\sync-skills.ps1"
                 $foundSkillsDrift = $true
             } elseif ((Get-FileHash $sf.FullName -Algorithm SHA256).Hash -ne (Get-FileHash $lf -Algorithm SHA256).Hash) {
-                Write-Host "  EDITED LOCALLY (will be lost on next sync!): $name$rel"
-                Write-Host "    -> if this fix is real, apply it in .claude\skills\$name instead, then re-run sync-skills.ps1"
+                Write-Host "  EDITED LOCALLY: $name$rel (apply fix in shared repo, then run tools\sync-skills.ps1)"
                 $foundSkillsDrift = $true
             }
         }
@@ -55,30 +55,66 @@ if (Test-Path $sharedSkills) {
 if (-not $foundSkillsDrift) { Write-Host "  none" }
 Write-Host ""
 
-Write-Host "=== Subagent drift (.claude\agents vs oracle-shared-skills\agents) ==="
+# 2. Multi-Client Subagent Drift
+Write-Host "=== Multi-Client Subagent Drift (vs oracle-shared-skills\agents) ==="
 $foundAgentDrift = $false
-if (Test-Path $projectAgents) {
-    Get-ChildItem $projectAgents -Filter "*.md" | ForEach-Object {
-        $sharedFile = Join-Path $sharedAgents $_.Name
-        if (-not (Test-Path $sharedFile)) {
-            Write-Host "  NEW (not in shared repo yet): $($_.Name)"
+
+# Check Claude Code & Antigravity (Markdown)
+$expectedMdAgents = Get-ChildItem $sharedAgents -Filter "*.md" -ErrorAction SilentlyContinue
+foreach ($agent in $expectedMdAgents) {
+    # Check Claude
+    $claudeTarget = Join-Path $projectClaudeAgents $agent.Name
+    if (-not (Test-Path $claudeTarget)) {
+        Write-Host "  MISSING IN CLAUDE: $($agent.Name) not in .claude\agents\"
+        $foundAgentDrift = $true
+    } elseif ((Get-FileHash $agent.FullName -Algorithm SHA256).Hash -ne (Get-FileHash $claudeTarget -Algorithm SHA256).Hash) {
+        Write-Host "  CHANGED IN CLAUDE: $($agent.Name) differs from shared repo"
+        $foundAgentDrift = $true
+    }
+
+    # Check Antigravity
+    $agyTarget = Join-Path $projectAgyAgents $agent.Name
+    if (-not (Test-Path $agyTarget)) {
+        Write-Host "  MISSING IN ANTIGRAVITY: $($agent.Name) not in .agents\agents\"
+        $foundAgentDrift = $true
+    } elseif ((Get-FileHash $agent.FullName -Algorithm SHA256).Hash -ne (Get-FileHash $agyTarget -Algorithm SHA256).Hash) {
+        Write-Host "  CHANGED IN ANTIGRAVITY: $($agent.Name) differs from shared repo"
+        $foundAgentDrift = $true
+    }
+}
+
+# Check Codex (TOML)
+$expectedTomlAgents = Get-ChildItem $sharedAgents -Filter "*.toml" -ErrorAction SilentlyContinue
+foreach ($agent in $expectedTomlAgents) {
+    $codexTarget = Join-Path $projectCodexAgents $agent.Name
+    if (-not (Test-Path $codexTarget)) {
+        Write-Host "  MISSING IN CODEX: $($agent.Name) not in .codex\agents\"
+        $foundAgentDrift = $true
+    } elseif ((Get-FileHash $agent.FullName -Algorithm SHA256).Hash -ne (Get-FileHash $codexTarget -Algorithm SHA256).Hash) {
+        Write-Host "  CHANGED IN CODEX: $($agent.Name) differs from shared repo"
+        $foundAgentDrift = $true
+    }
+}
+
+# Check for Retired Legacy Agents
+$retiredList = @("th-argument-mapper.md", "th-verbalizer.md", "th-editorial-reviewer.md", "th-argument-mapper.toml", "th-verbalizer.toml", "th-editorial-reviewer.toml")
+foreach ($retired in $retiredList) {
+    @($projectClaudeAgents, $projectAgyAgents, $projectCodexAgents) | ForEach-Object {
+        $p = Join-Path $_ $retired
+        if (Test-Path $p) {
+            Write-Host "  RETIRED AGENT STILL PRESENT: $p (run tools\sync-skills.ps1 to purge)"
             $foundAgentDrift = $true
-        } else {
-            $localHash  = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
-            $sharedHash = (Get-FileHash $sharedFile -Algorithm SHA256).Hash
-            if ($localHash -ne $sharedHash) {
-                Write-Host "  CHANGED (differs from shared repo): $($_.Name)"
-                $foundAgentDrift = $true
-            }
         }
     }
 }
-if (-not $foundAgentDrift) { Write-Host "  none" }
 
+if (-not $foundAgentDrift) { Write-Host "  none" }
 Write-Host ""
+
+# 3. Hook Drift
 Write-Host "=== Hook drift (.claude\settings.local.json vs writing-th\setup\settings.local.hooks.json) ==="
-$settingsPath   = Join-Path $ProjectRoot ".claude\settings.local.json"
-$hooksTemplate  = Join-Path $sharedRoot "skills\writing-th\setup\settings.local.hooks.json"
+$settingsPath  = Join-Path $ProjectRoot ".claude\settings.local.json"
+$hooksTemplate = Join-Path $sharedRoot "skills\writing-th\setup\settings.local.hooks.json"
 if ((Test-Path $settingsPath) -and (Test-Path $hooksTemplate)) {
     $localSettings = Get-Content $settingsPath -Raw | ConvertFrom-Json -AsHashtable
     $template      = Get-Content $hooksTemplate -Raw | ConvertFrom-Json -AsHashtable
@@ -93,25 +129,3 @@ if ((Test-Path $settingsPath) -and (Test-Path $hooksTemplate)) {
 } else {
     Write-Host "  could not compare (missing settings.local.json or template)"
 }
-
-Write-Host ""
-Write-Host "=== Global agent drift ($HOME\.claude\agents vs oracle-shared-skills\global-agents) ==="
-$foundGlobalDrift = $false
-if (Test-Path $sharedGlobalAgents) {
-    Get-ChildItem $sharedGlobalAgents -Filter "*.md" | ForEach-Object {
-        $userFile = Join-Path $userGlobalAgents $_.Name
-        if (-not (Test-Path $userFile)) {
-            Write-Host "  MISSING IN USER FOLDER: $($_.Name) not in $userGlobalAgents (run sync-global-agents.ps1)"
-            $foundGlobalDrift = $true
-        } else {
-            $userHash   = (Get-FileHash $userFile -Algorithm SHA256).Hash
-            $sharedHash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
-            if ($userHash -ne $sharedHash) {
-                Write-Host "  DIFFERENT: $($_.Name) differs between shared repo and $userGlobalAgents"
-                $foundGlobalDrift = $true
-            }
-        }
-    }
-}
-if (-not $foundGlobalDrift) { Write-Host "  none" }
-

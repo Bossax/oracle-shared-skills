@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0 - 2026-10-04
+
+Major architecture upgrade: unified multi-client subagent provisioning, zero-overhead Node.js engine, and repository reorganization.
+
+- **Unified Multi-Client Subagents:** Consolidated all shared subagents into `agents/` (`thai-writer.md` for Claude Code & Antigravity, `thai-writer.toml` for Codex CLI). Deleted `global-agents/` and retired legacy agents (`th-argument-mapper`, `th-verbalizer`, `th-editorial-reviewer`).
+- **Zero-Overhead Node.js Engine:** Replaced Python `.venv`, `pythainlp`, and `requirements.txt` with zero-dependency Node.js (`.mjs`) utilizing native V8 ICU `Intl.Segmenter('th', { granularity: 'word' })`.
+- **PreToolUse & PostToolUse Hooks:** Upgraded `check_draft_preconditions.mjs` (Dual-Lane blueprint gate & ledger guard) and `post_draft_lint.mjs` (automatic non-blocking lint on `.md` writes in `ψ/writing/`).
+- **`drafting-plan.md` Protocol:** Upgraded `writing-th` to v7.0.0. Unified the writing contract, SCQA story arc, and R1–R9 paragraph archetypes into a single readable Markdown blueprint.
+- **Repository Reorganization:** Renamed root `scripts/` to `tools/`. Added declarative `tools/sync-skills.ps1` to provision skills, deploy multi-client subagents, and purge dead agents in a single pass.
+- **Documentation & Governance:** Added English `AGENTS.md` and `CLAUDE.md` defining architecture, multi-client scanner behavior, and development lifecycle.
+
 ## v1.4.0 - 2026-09-30
 
 Added global agent synchronization to shared-skill-release and registered `Jiu-climate-risk-and-resilience` in `consumers.json`.

@@ -189,15 +189,11 @@ From the target project root:
        }
    }
    ```
-3. Populate `.agents/skills` as real directories for Antigravity & Codex:
+3. Populate `.agents/skills` and provision multi-client subagents:
    ```powershell
-   pwsh -File .oracle-shared-skills\scripts\sync-skills.ps1 -ProjectRoot (Get-Location).Path
+   pwsh -File .oracle-shared-skills\tools\sync-skills.ps1 -ProjectRoot (Get-Location).Path
    ```
-4. Populate `.claude/agents` for shared subagents:
-   ```powershell
-   pwsh -File .oracle-shared-skills\scripts\sync-agents.ps1 -ProjectRoot (Get-Location).Path
-   ```
-5. Update `.gitignore` to keep local machine configs and junctioned skills clean:
+4. Update `.gitignore` to keep local machine configs and junctioned skills clean:
    ```gitignore
    # Local client configs (machine-specific)
    .mcp.json

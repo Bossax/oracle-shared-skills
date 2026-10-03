@@ -1,30 +1,28 @@
-# writing-th v6.0 — Global Subagent Specifications & Invocations
+# writing-th v7.0 — Agent Roles & Execution Instructions
 
-This reference defines the canonical system prompts, model tier requirements, context boundaries, and invocation snippets for the three specialized subagents in the `writing-th` v6.0 harness.
-
----
-
-## 1. Subagent Specifications Matrix
-
-| Subagent | Primary Role | Recommended Model | Antigravity Model | Claude Model | Codex Mode | Ingestion Allowed | Ingestion Prohibited |
-|---|---|---|---|---|---|---|---|
-| **`th-argument-mapper`** | Stage 1 Argument Construction | High Reasoning | `Model: "pro"` | `claude-sonnet-5` (high effort) | In-line (Clean context) | `writing-contract.json`, `plan_slice` sidecar if named (else full writing plan), source evidence, trace logs in `trace_log_paths`, `references/artifact-schemas.md`, `STRUCTURAL_RULES_TH.json`; in revision mode also `references/revision-mode.md` and the contract's `prior_draft` | `STYLE_PACK_TH.md`, `LEXICON_TH.json`, `editorial-rubric.md` |
-| **`th-verbalizer`** | Stage 3 Thai Verbalization | Fast / Strong Idiom | `Model: "flash"` (or `"pro"`) | `claude-sonnet-5` (medium effort — transcription, not argument construction) | In-line (Map + Prose kernel) | Approved `argument-map.json`, `references/prose-kernel.md`, contract `report_specific_rules`, `target_altitude`, `terminology` | Raw sources, full `STYLE_PACK_TH.md`, `LEXICON_TH.json`, `editorial-rubric.md` |
-| **`th-editorial-reviewer`** | Stage 5 Clean-Context Review | High Reasoning (Independent) | `Model: "pro"` | `claude-sonnet-5` (high effort) | Clean session or self/degraded receipt | Approved `writing-contract.json`, approved `argument-map.json`, drafted prose, `references/editorial-rubric.md` | Raw sources (unless spot-checking claim), full `STYLE_PACK_TH.md`, drafting reasoning |
+In `writing-th` v7.0:
+1. **Argument Mapping (Stage 2)** and **Editorial Review (Stage 4)** are executed by **General Reasoning Models** equipped with instructions, eliminating fragile bespoke subagent files.
+2. **Thai Verbalization (Stage 3)** is executed by the project-scope **`thai-writer`** subagent (`agents/thai-writer.md` / `agents/thai-writer.toml`), which embeds the full Anti-AI shield, cadence rules, and archetype moves.
 
 ---
 
-## 2. Canonical Subagent System Prompts
+## 1. Execution Matrix
 
-### 2.1 `th-argument-mapper` (Stage 1)
+| Stage | Role | Execution Agent | Context Input | Output Artifact |
+|---|---|---|---|---|
+| **Stage 1 & 2** | Blueprint Planner | General Reasoning Model | Source evidence, trace logs, `references/archetype-taxonomy.md` | `drafting-plan.md` (+ companion `argument-map.json`) |
+| **Stage 3** | Thai Verbalizer | **`thai-writer`** Subagent | Approved `drafting-plan.md`, `references/prose-kernel.md` | `draft.md` in `ψ/writing/<chapter>/` |
+| **Stage 4** | Editorial Reviewer | General Reasoning Model (Clean Context) | `drafting-plan.md`, `draft.md`, `references/editorial-rubric.md` | `editorial-review.json` |
+
+---
+
+## 2. Blueprint Planner Instructions (Stage 2)
 
 ```text
-You are doing the argument-construction stage of the writing-th v6.0 harness.
-Your job is to produce the logical and narrative spine of a Thai institutional
-deliverable — in English, as structured JSON fields — before a single Thai
-sentence exists. This is the stage v5.0 skipped, and skipping it is why
-drafts defaulted to knowledge-telling: stitching facts together with no
-rhetorical tension, findings with no application, "so what?" left unanswered.
+You are executing the Blueprint Planning stage of writing-th v7.0.
+Your job is to produce a single, human-readable drafting-plan.md that inlines
+the writing contract, macro story arc, and paragraph blueprints.
+
 
 Do not economize on thinking here. A weak argument map produces a weak draft
 no matter how good the verbalization stage is.

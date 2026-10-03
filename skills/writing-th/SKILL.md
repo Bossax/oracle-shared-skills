@@ -1,69 +1,48 @@
 ---
 name: writing-th
 description: >
-  v6.2.0 L-SKLL | Draft, revise, and quality-gate Thai institutional writing.
-  Use for Thai policy reports, executive summaries, articles, and formal letters
-  when source fidelity, audience fit, and explicit merge approval matter.
+  v7.0.0 L-SKLL | Draft, revise, and quality-gate Thai institutional writing.
+  Supports Dual-Lane Architecture: Fast Tactical Lane (standalone polish, translation,
+  and quick notes via thai-writer) and Strategic Synthesis Lane (greenfield chapters
+  and policy deliverables via human-readable drafting-plan.md and verified gates).
 metadata:
-  origin: project-local/arun-creagy-oracles
+  origin: oracle-shared-skills
   installer: project
 ---
 
-# /writing-th — Thai Institutional Writing Harness v6.2
+# /writing-th: Thai Institutional Writing Harness v7.0
 
 Turn technical evidence into decision-ready Thai prose without confusing a
-mechanical lint pass with editorial quality — and without asking one context
+mechanical lint pass with editorial quality, and without asking one context
 to formulate arguments, retrieve facts, invent connective reasoning, and draft
-formal Thai prose all at once. That overload is what v5.0 got wrong: it went
-straight from a metadata contract to a one-shot prose pass, with no argument
-artifact in between, and the result was knowledge-telling — facts stitched
-together with no rhetorical tension, findings with no "so what."
+formal Thai prose all at once.
 
-v6.0's core move: insert `argument-map.json` between scope and prose, and
-enforce it as a **context boundary**, not just an added file. Argument
-construction gets sources and no style material. Verbalization gets the
-approved map and a style kernel, never the raw sources. The parent session
-holds only paths, hashes, and gate verdicts — never content.
+`writing-th` v7.0 operates on a **Dual-Lane Architecture**:
+1. **Fast Tactical Lane:** When the task is a self-contained note, translation, polish, or minor revision, invoke the project-scope **`thai-writer`** subagent directly. It writes to `ψ/writing/<slug>.md` without multi-stage pipeline overhead.
+2. **Strategic Synthesis Lane:** When drafting major greenfield chapters, policy deliverables, or multi-source reports, execute the structured 3-stage workflow anchored by the human-readable **`drafting-plan.md`**.
 
 ## Non-negotiable invariants
 
-1. **Draft isolation** — write only to `ψ/incubate/drafts/`, another approved
-   scratch location, or the chat. Never overwrite the destination before the
-   human explicitly says `Approve`, `Merge`, or `Execute`.
-2. **One scoped unit at a time** — do not batch unrelated sections.
-3. **No prose before an approved argument map** — physically enforced by the
-   `PreToolUse` hook on `Write|Edit`: a write to `ψ/incubate/drafts/**/*draft*.md`
-   is denied when the sibling `argument-map.json` is missing or its
-   `approval.status` is not `approved`. This is not a convention to remember;
-   it cannot be skipped.
-4. **Source fidelity** — preserve required evidence, distinctions, tables,
-   equations, and frameworks. Compression is governed by the transformation
-   mode, not by a universal character ratio.
-5. **Three different assurances** — mechanical checks detect encoded
-   patterns; Tier 1 review judges whether the argument map's reasoning
-   actually holds; Tier 2 review judges whether the prose faithfully
-   verbalizes that map. Never call a mechanical pass an editorial approval,
-   and never let a Tier 2 pass stand in for Tier 1.
-6. **No ledger writes** — do not modify style memory, retrospectives, or the miss
-   register except through their own explicitly invoked maintenance skill. The
-   ordinary linter may log runs only when repository policy permits it.
+1. **Centralized Workspace:** All working drafts and chapter folders live in `ψ/writing/` (per `03-brain-structure.md`). Never scatter drafts in temporary folders.
+2. **No Prose Before Approved Blueprint:** Enforced mechanically by `check_draft_preconditions.mjs` (PreToolUse hook): writes to `ψ/writing/<chapter>/draft*.md` are blocked unless `drafting-plan.md` exists and contains `Approval Status: approved`.
+3. **Human-Readable Planning:** Boss never inspects raw JSON for arguments. The entire contract, SCQA story arc, and paragraph blueprints are inlined in Markdown (`drafting-plan.md`). Companion `argument-map.json` is generated beside it purely for machine validation (`argument_gate.mjs`).
+4. **Source Fidelity & No Ledger Modification:** Never invent facts not in the evidence. Direct writes to `ψ/memory/ledgers/**` and `ψ/memory/style/**` are hard-blocked during writing sessions.
+5. **Cadence & Archetype Discipline:** Every paragraph must declare an explicit archetype (R1–R9 from `references/archetype-taxonomy.md`) or a candidate flag `[CANDIDATE-ARCHETYPE: <Name>]`.
+6. **Zero-Overhead Node.js Engine:** Linters and hooks execute natively via Node.js (`Intl.Segmenter`) with zero Python `.venv` overhead.
 
-## Stage → agent → context map
+## Stage Map (Strategic Synthesis Lane)
 
-See [references/subagent-prompts.md](references/subagent-prompts.md) for canonical prompts, model tiers, and invocation snippets.
+See [references/subagent-prompts.md](references/subagent-prompts.md) for canonical prompts and instructions.
 
-| Stage | Runs as | Loads | Must never load |
+| Stage | Runs as | Context Input | Output Artifact |
 |---|---|---|---|
-| 0 Contract | Parent + `AskUserQuestion` / `ask_question` | plan index, source paths, writing plan (if any) | sources, full style pack |
-| 1 Argument map | Tier-dependent — orchestrator (small), `fork` (medium/large), or `th-argument-mapper` (`invoke_subagent` / fallback `Agent`) — see Claude Code execution tiers below | `plan_slice` sidecar if named (else writing plan), sources, argument schema, contract `target_altitude`, plus `prior_draft` + revision-mode reference when revising | style pack, lexicon, rubric |
-| 2 Blueprint gate | Parent (Plan Mode / Markdown Artifact + `ask_question`) | rendered map summary | everything else |
-| 3 Verbalization | Tier-dependent — orchestrator (small), `fork` (medium/large), or `th-verbalizer` (`invoke_subagent` / fallback `Agent`) — see Claude Code execution tiers below | `argument-map.json`, prose kernel, contract `report_specific_rules` & `target_altitude` | raw sources, full pack, rubric |
-| 4 Mechanical gate | CLI only | — | nothing enters a model context |
-| 5 Editorial review | `th-editorial-reviewer` (`invoke_subagent` / `Agent`) — fresh subagent, never fork, never inline, at every tier | draft, argument map, contract, rubric | sources, style pack, drafting reasoning |
-| 6 Merge | CLI + parent | hashes, verdicts | — |
+| **0. Contract & Scope** | Parent Session | Writing brief, source evidence paths, trace logs | Inlined into Part 1 of `drafting-plan.md` |
+| **1. Story Arc & Blueprints** | General Reasoner | Evidence, trace lineage, `references/archetype-taxonomy.md` | `drafting-plan.md` (+ companion `argument-map.json`) |
+| **2. Blueprint Gate** | Parent Session (User Confirmation) | Rendered `drafting-plan.md` | Human approval (`Approval Status: approved`) |
+| **3. Verbalization** | **`thai-writer`** Subagent | Approved `drafting-plan.md`, `references/prose-kernel.md` | `draft.md` in `ψ/writing/<chapter>/` |
+| **4. Editorial Review & Merge** | General Reasoner + User | `draft.md`, `drafting-plan.md`, `references/editorial-rubric.md` | `editorial-review.json` + final promotion |
 
-`LEXICON_TH.json` should never enter a model context at any stage —
-`lint_thai_writing.py` reads it; only violations need to reach a model.
+`LEXICON_TH.json` should never enter a model context at any stage. `lint_thai_writing.mjs` reads it; only violations reach a model.
 
 ### Cross-Agent Runtime Mapping
 

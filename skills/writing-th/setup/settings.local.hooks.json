@@ -6,9 +6,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/check_draft_preconditions.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/check_draft_preconditions.mjs\"",
             "timeout": 15,
-            "statusMessage": "Checking argument-map gate..."
+            "statusMessage": "Checking writing-th blueprint gate & ledger guard..."
           }
         ]
       }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/post_draft_lint.py\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.agents/skills/writing-th/scripts/post_draft_lint.mjs\"",
             "timeout": 30,
             "statusMessage": "Linting Thai draft..."
           }

@@ -112,7 +112,7 @@ git commit -m "bump oracle-shared-skills to vX.Y.Z"
 ## Step 6 - Propagate to every other consumer project
 
 ```
-pwsh -File <project>\.oracle-shared-skills\skills\shared-skill-release\scripts\propagate.ps1 -Tag vX.Y.Z -ExcludeProjectPaths <project> -SyncAgents:<$true if Step 2 added/changed a subagent file, else $false> -SyncGlobalAgents:<$true if Step 2 added/changed a global agent file, else $false>
+pwsh -File <project>\.oracle-shared-skills\skills\shared-skill-release\scripts\propagate.ps1 -Tag vX.Y.Z -ExcludeProjectPaths <project>
 ```
 
 This walks `consumers.json`, and for every project other than the one just released

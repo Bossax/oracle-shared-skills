@@ -55,36 +55,17 @@ foreach ($c in $consumers) {
     git commit -m "bump oracle-shared-skills to $Tag"
     Pop-Location
 
-    # .agents\skills copies always need refreshing - they're not junctions (see
-    # README "Why .agents\skills is copied, not junctioned"), so any skill
-    # content change requires this regardless of what else changed.
-    $skillsSyncScript = Join-Path $sub "scripts\sync-skills.ps1"
+    # tools\sync-skills.ps1 provisions skills and multi-client agents into consumer project
+    $skillsSyncScript = Join-Path $sub "tools\sync-skills.ps1"
+    if (-not (Test-Path $skillsSyncScript)) {
+        $skillsSyncScript = Join-Path $sub "scripts\sync-skills.ps1" # backward compat
+    }
     if (Test-Path $skillsSyncScript) {
         pwsh -File $skillsSyncScript -ProjectRoot $c.path
     }
 
-    if ($SyncAgents) {
-        $syncScript = Join-Path $sub "scripts\sync-agents.ps1"
-        if (Test-Path $syncScript) {
-            pwsh -File $syncScript -ProjectRoot $c.path
-        }
-    }
-
     Write-Host "$($c.name) bumped to $Tag."
     Write-Host ""
-}
-
-if ($SyncGlobalAgents) {
-    # Resolve scripts\sync-global-agents.ps1 relative to this repo root
-    $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
-    $globalSyncScript = Join-Path $repoRoot "scripts\sync-global-agents.ps1"
-    if (Test-Path $globalSyncScript) {
-        Write-Host "=== Syncing global agents to `$HOME\.claude\agents ==="
-        pwsh -File $globalSyncScript
-        Write-Host ""
-    } else {
-        Write-Host "sync-global-agents.ps1 not found at $globalSyncScript."
-    }
 }
 
 Write-Host "If this release changed hooks, apply them manually per project - see SKILL.md Step 7. Not automated here."

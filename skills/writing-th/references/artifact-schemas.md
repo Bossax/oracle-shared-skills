@@ -3,45 +3,51 @@
 Both artifacts are UTF-8 JSON files stored beside the isolated draft. Paths may
 be absolute or repository-relative. Timestamps use ISO 8601.
 
-## `writing-contract.json`
+## `drafting-plan.md` (Unified Human-Facing Planning Artifact)
 
-```json
-{
-  "schema_version": "1.0",
-  "profile": "executive-summary",
-  "transformation_mode": "synthesis",
-  "audience": "DCCE executives and policy owners",
-  "decision_use": "Understand the national information gap and approve the blueprint direction",
-  "section_job": "Establish the problem, governing response, and decision value",
-  "target_altitude": "Five-minute executive read; findings and implications, not full methods",
-  "report_specific_rules": [
-    "Use 'คณะที่ปรึกษา' as the active subject for analysis/design decisions",
-    "Keep executive altitude: avoid internal operational acronym clutter (AD&ADF, DET, CRT)",
-    "Paragraph rhythm and proportion should match Executive-Summary-Report-CRI-Project.md"
-  ],
-  "inclusions": ["three information-use failures", "web/data platform distinction"],
-  "exclusions": ["slide locators", "per-platform literature review", "section roadmap"],
-  "evidence_policy": "Use verified facts in prose; keep internal locators in the traceability sidecar",
-  "required_concepts": ["findability", "trust", "usable form"],
-  "terminology": {"first_mention": "โครงสร้างข้อมูลด้านการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ", "short_form": "โครงสร้างข้อมูลฯ"},
-  "required_structures": ["four-question table", "figure placeholder for development process"],
-  "source_paths": ["path/to/source.md"],
-  "trace_log_paths": ["ψ/memory/traces/YYYY-MM-DD/HHMM_query.md"],
-  "reference_samples": ["path/to/approved-sample.md"],
-  "prior_draft": "path/to/existing-draft.md",
-  "prior_approval": {"approved_by": "Boss", "basis": "what the earlier contract's approval rested on"},
-  "plan_slice": "path/to/plan-slice.md",
-  "stage_0_checklist": {
-    "plan_mode_executed": true,
-    "outline_verified": true,
-    "evidence_base_verified": true,
-    "session_rules_verified": true,
-    "plan_source": "existing_plan"
-  },
-  "execution_tier": {"tier": "medium", "stage_1_3_mode": "fork", "orchestrator_clean": true, "chosen_by": "Boss"},
-  "approval": {"status": "approved", "approved_by": "Boss", "approved_at": "2026-08-28T01:00:00+07:00"}
-}
+`drafting-plan.md` replaces raw JSON review by inlining the entire writing contract, macro story arc, and paragraph blueprints into a single readable Markdown document stored in `ψ/writing/<chapter_id>/`:
+
+```markdown
+# 📋 แผนการร่างและพิมพ์เขียวบทความ (Drafting Plan): <Chapter ID / Title>
+
+## ส่วนที่ 1: สัญญาข้อตกลงและขอบเขต (Contract & Constraints)
+- **กลุ่มผู้อ่าน (Audience):** ผู้บริหาร DCCE และคณะกรรมการนโยบาย
+- **ระดับความลึก (Target Altitude):** Executive Summary (เน้นข้อค้นพบเชิงปฏิบัติการ)
+- **ภารกิจของบท (Section Job):** ชี้แจงช่องว่างข้อมูล 8 บริการและเสนอทางออกเร่งด่วน
+- **ประธานผู้ดำเนินงาน (Active Actor):** คณะที่ปรึกษา
+- **กฎเฉพาะของรายงาน:** ห้ามใช้คำย่อปฏิบัติการภายใน (AD&ADF), ยึดรูปแบบ Executive CRI
+- **แหล่งข้อมูลอ้างอิง (Source Paths):** `ψ/incubate/.../WP6-Service-Narratives.md`
+- **บันทึกการสืบค้น (Trace Paths):** `ψ/memory/traces/2026-09-29/1600_ch6-five-services.md`
+- **สถานะการอนุมัติ (Approval Status):** pending / approved
+
+---
+
+## ส่วนที่ 2: โครงเรื่องระดับมหภาค (Macro Story Arc)
+- **แกนนำทางความคิด (Governing Thought):** [Minto Top Takeaway]
+- **สถานการณ์ (Situation):** [บริบทและฐานความจริงร่วม]
+- **ความตึงเครียด (Complication):** [อุปสรรคและช่องว่างเชิงสถาบัน]
+- **คำถามชี้นำ (Question):** [คำถามหลักที่ส่วนนี้ต้องตอบ]
+- **คำตอบเชิงยุทธศาสตร์ (Answer):** [ข้อเสนอแนะหลัก]
+
+---
+
+## ส่วนที่ 3: พิมพ์เขียวรายย่อหน้า (Paragraph Blueprint & Decision Tree)
+
+### ย่อหน้า 1: บริบทภายนอกและความจำเป็น
+- **แม่แบบ (Archetype):** `R1` (ตัวเลขภายนอก → แม้...แต่ → ชี้ความจำเป็น)
+- **ภารกิจ (Job):** diagnose
+- **ประโยคทุบประเด็น (Landing Punchline):** ประเทศไทยจำเป็นต้องมีโครงสร้างข้อมูลเพื่อติดตามความเสี่ยงอย่างเป็นระบบ
+- **ข้อมูลหลักฐานที่ต้องบรรจุ:** ดัชนี CRI ปี 2567 อันดับ 17
+
+### ย่อหน้า 2: สถิติความเสียหายสู่นัยเชิงปฏิบัติการ
+- **แม่แบบ (Archetype):** `R2` (ข้อค้นพบ → ตัวเลขจริง → เทียบฐาน → สะท้อนว่า → นัยต่อการลงมือ)
+- **ภารกิจ (Job):** diagnose
+- **ประโยคทุบประเด็น (Landing Punchline):** อุทกภัยปี 2567 สร้างผลกระทบผิดปกติและต้องใช้ทบทวนระบบเตือนภัย
+- **ข้อมูลหลักฐานที่ต้องบรรจุ:** ผู้ได้รับผลกระทบ 3.63 ล้านคน
 ```
+
+*Note: A companion `argument-map.json` is generated quietly beside `drafting-plan.md` for machine validation (`argument_gate.mjs`).*
+
 
 Required profiles are `executive-summary`, `report`, `article`, or `letter`.
 Required modes are `rewrite`, `synthesis`, or `new`. Every listed key is
