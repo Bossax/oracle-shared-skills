@@ -1,15 +1,16 @@
 # Changelog
 
+## v2.1.0 — 2026-10-09
+
+Added MAW Inter-Oracle Shared Skills Suite (`maw-conduct`, `maw-serve`, `maw-doctor`, `maw-room`) enabling symmetric federated orchestration, safe tmux canvas provisioning, and zero-token OS-level waiting.
+
+- Added `skills/maw-conduct/`: Cognitive Orchestrator & 3-Step Escalation (Ask yourself -> Ask a friend -> Tell friends to do their parts), automated WSL ticket dispatch (`dispatch_ticket.ps1`), zero-token OS waiter (`wait_for_inbox.ps1`), and RFC inter-op ticket contract (`interop-contract.md`).
+- Added `skills/maw-serve/`: Sovereign Inbound Responder skill with dynamic requester inbox deposits, local outbox archival, and completion wire signaling (`complete_ticket.ps1`).
+- Added `skills/maw-doctor/`: Fleet liveness monitoring (`maw oracle ls`, `maw ls -v`), live pane snoop (`maw peek`), and automated trap diagnostics (`scan_fleet.ps1`).
+- Added `skills/maw-room/`: Safe 4-step tmux team canvas provisioner avoiding cheatsheet traps (`create` -> `invite` -> `new` -> `bring`) and clean teardown (`provision_room.ps1`).
+- Updated `consumers.json`: Registered `creagy-writing` and `Quint-oracle` as consumer repositories.
+
 ## v2.0.0 - 2026-10-04
-
-Major architecture upgrade: unified multi-client subagent provisioning, zero-overhead Node.js engine, and repository reorganization.
-
-- **Unified Multi-Client Subagents:** Consolidated all shared subagents into `agents/` (`thai-writer.md` for Claude Code & Antigravity, `thai-writer.toml` for Codex CLI). Deleted `global-agents/` and retired legacy agents (`th-argument-mapper`, `th-verbalizer`, `th-editorial-reviewer`).
-- **Zero-Overhead Node.js Engine:** Replaced Python `.venv`, `pythainlp`, and `requirements.txt` with zero-dependency Node.js (`.mjs`) utilizing native V8 ICU `Intl.Segmenter('th', { granularity: 'word' })`.
-- **PreToolUse & PostToolUse Hooks:** Upgraded `check_draft_preconditions.mjs` (Dual-Lane blueprint gate & ledger guard) and `post_draft_lint.mjs` (automatic non-blocking lint on `.md` writes in `ψ/writing/`).
-- **`drafting-plan.md` Protocol:** Upgraded `writing-th` to v7.0.0. Unified the writing contract, SCQA story arc, and R1–R9 paragraph archetypes into a single readable Markdown blueprint.
-- **Repository Reorganization:** Renamed root `scripts/` to `tools/`. Added declarative `tools/sync-skills.ps1` to provision skills, deploy multi-client subagents, and purge dead agents in a single pass.
-- **Documentation & Governance:** Added English `AGENTS.md` and `CLAUDE.md` defining architecture, multi-client scanner behavior, and development lifecycle.
 
 ## v1.4.0 - 2026-09-30
 
