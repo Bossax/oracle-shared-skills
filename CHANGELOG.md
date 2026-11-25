@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.0 - 2026-11-25
+
+Added `/undo-ai` (`skills/undo-ai/SKILL.md`) to strip AI writing signs (`WP:AISIGNS`), audit exaggerations and unverified numbers, and rewrite chat output or files into plain, professional English via a fresh general-subagent cold audit.
+
+- Added `skills/undo-ai/SKILL.md`: 3-step Option A workflow (subagent cold audit table -> user confirmation -> plain-English rewrite) covering 8 audit categories (`WP:AISIGNS` + project fact-boundary and redundancy rules).
+
 ## v2.1.0 — 2026-10-09
 
 Added MAW Inter-Oracle Shared Skills Suite (`maw-conduct`, `maw-serve`, `maw-doctor`, `maw-room`) enabling symmetric federated orchestration, safe tmux canvas provisioning, and zero-token OS-level waiting.
