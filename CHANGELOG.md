@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3.0 - 2026-11-26
+
+Added `maw-register` (`skills/maw-register/SKILL.md`) to register a local Windows Oracle repository into WSL MAW, and added `Aon-city-climate-oracle` to `consumers.json`.
+
+- Added `skills/maw-register/SKILL.md` and `skills/maw-register/scripts/register_oracle.ps1`: creates `/home/sitth/Code/github.com/local/<name>-oracle` symlink in WSL, runs `maw oracle register <name>`, and updates `~/.config/maw/maw.config.json` (`agents` and optional `commands`).
+- Updated `consumers.json`: registered `Aon-city-climate-oracle`.
+
 ## v2.2.1 - 2026-11-26
 
 Fixed WSL `tmux`/`agy` launch reliability, non-interactive `maw` hangs, and `maw-room` provisioning in `maw-conduct` and `maw-room`.
