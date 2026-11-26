@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Dispatches an Inter-Op ticket to a peer Oracle via maw-js in WSL.
 
@@ -84,24 +84,24 @@ if ($DryRun) {
 
 # WSL Dispatch wrapper
 function Invoke-WslBash([string]$BashCommand) {
-    wsl -d Ubuntu -e bash -c "export PATH=`$HOME/.bun/bin:`$PATH; $BashCommand"
+    wsl -d Ubuntu -e setsid -w bash -c "export PATH=`$HOME/.local/bin:`$HOME/.bun/bin:`$PATH; $BashCommand"
 }
 
 # 1. Check if target is awake
 Write-Host "Checking liveness of '$Target' in MAW..."
-$lsOutput = Invoke-WslBash "maw ls 2>/dev/null || true"
-$isAwake = ($lsOutput -match "\b$Target\b")
+$lsOutput = Invoke-WslBash "maw ls -v 2>/dev/null || true"
+$isAwake = ($lsOutput -match "(?m)[:/]$Target(-oracle)?(\.\d+)?\s+(?!bash\b|sh\b|zsh\b)\S+")
 
 if (-not $isAwake) {
     Write-Host "'$Target' is sleeping. Waking up..."
     Invoke-WslBash "maw wake $Target"
-    Start-Sleep -Seconds 3
+    Start-Sleep -Seconds 5
 }
 
 # 2. Check for bash-drop trap (verify not idle at raw bash prompt)
 $peekOutput = Invoke-WslBash "maw peek $Target 2>/dev/null || true"
 if ($peekOutput -match "(bash|sh)\s*[$#]\s*$" -or $peekOutput -match "command not found") {
-    Write-Warning "Target '$Target' pane appears to be at a bash prompt! Injecting text directly may fail."
+    throw "Target '$Target' pane is at a raw shell prompt (agent failed to launch). Aborting ticket injection."
 }
 
 # 3. Dispatch ticket via maw hey

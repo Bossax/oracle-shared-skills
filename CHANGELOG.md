@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2.1 - 2026-11-26
+
+Fixed WSL `tmux`/`agy` launch reliability, non-interactive `maw` hangs, and `maw-room` provisioning in `maw-conduct` and `maw-room`.
+
+- Updated `skills/maw-conduct/scripts/dispatch_ticket.ps1`: wrapped WSL execution with `setsid -w` (prevents `maw` `auto-restore` `/dev/tty` hangs), added `$HOME/.local/bin` to `PATH` for native Linux `agy`, switched liveness check to `maw ls -v` to detect live team panes, and abort with `throw` instead of warning when target drops to a raw shell.
+- Updated `skills/maw-room/scripts/provision_room.ps1`: added `setsid -w` and `$HOME/.local/bin` to `Invoke-WslBash`, normalized comma-separated `-Members`, passed `--split` to `maw team bring`, and ensured `-Teardown` runs `tmux kill-session` unconditionally after `maw team down`.
+
 ## v2.2.0 - 2026-11-25
 
 Added `/undo-ai` (`skills/undo-ai/SKILL.md`) to strip AI writing signs (`WP:AISIGNS`), audit exaggerations and unverified numbers, and rewrite chat output or files into plain, professional English via a fresh general-subagent cold audit.

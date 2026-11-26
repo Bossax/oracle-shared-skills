@@ -17,13 +17,15 @@ param(
     [switch]$Teardown
 )
 
+$Members = @($Members | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+
 function Invoke-WslBash([string]$BashCommand) {
-    wsl -d Ubuntu -e bash -c "export PATH=`$HOME/.bun/bin:`$PATH; $BashCommand"
+    wsl -d Ubuntu -e setsid -w bash -c "export PATH=`$HOME/.local/bin:`$HOME/.bun/bin:`$PATH; $BashCommand"
 }
 
 if ($Teardown) {
     Write-Host "Tearing down team room '$Team'..."
-    Invoke-WslBash "maw team down $Team 2>/dev/null || tmux kill-session -t $Team 2>/dev/null || true"
+    Invoke-WslBash "maw team down $Team 2>/dev/null || true; tmux kill-session -t $Team 2>/dev/null || true"
     Write-Host "Team room '$Team' closed cleanly."
     exit 0
 }
@@ -48,8 +50,8 @@ Write-Host "Step 3: Initializing tmux canvas (maw new $Team)..."
 Invoke-WslBash "maw new $Team 2>/dev/null || true"
 
 # Step 4: Dock and tile member panes
-Write-Host "Step 4: Tiling member panes (maw team bring $Team)..."
-Invoke-WslBash "maw team bring $Team 2>/dev/null || true"
+Write-Host "Step 4: Tiling member panes (maw team bring $Team --split)..."
+Invoke-WslBash "maw team bring $Team --split 2>/dev/null || true"
 
 Write-Host "`nTeam room '$Team' is ready!"
 Write-Host "To attach visually in terminal, run: maw a $Team"
