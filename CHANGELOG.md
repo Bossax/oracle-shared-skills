@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4.0 - 2026-11-28
+
+Added `/study` (`skills/study/SKILL.md`) for Human-in-the-Loop (HITL) iterative study and NotebookLM micro-query extraction.
+
+- Added `skills/study/SKILL.md`: 4-step HITL study cycle (Sensing -> Forge -> Harvest -> Rhythm) with mandatory Decision & Integration Gate and Decision Log Freeze locks, generalized for all consumer repos.
+
 ## v2.3.0 - 2026-11-26
 
 Added `maw-register` (`skills/maw-register/SKILL.md`) to register a local Windows Oracle repository into WSL MAW, and added `Aon-city-climate-oracle` to `consumers.json`.
